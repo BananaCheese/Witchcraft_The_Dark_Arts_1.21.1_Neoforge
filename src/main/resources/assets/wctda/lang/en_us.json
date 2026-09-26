@@ -1,0 +1,13 @@
+{
+  "itemGroup.wctda": "Example Mod Tab",
+  "block.wctda.example_block": "Example Block",
+  "item.wctda.example_item": "Example Item",
+
+  "wctda.configuration.title": "Witchcraft: The Dark Arts Configs",
+  "wctda.configuration.section.wctda.common.toml": "Witchcraft: The Dark Arts Configs",
+  "wctda.configuration.section.wctda.common.toml.title": "Witchcraft: The Dark Arts Configs",
+  "wctda.configuration.items": "Item List",
+  "wctda.configuration.logDirtBlock": "Log Dirt Block",
+  "wctda.configuration.magicNumberIntroduction": "Magic Number Text",
+  "wctda.configuration.magicNumber": "Magic Number"
+}
