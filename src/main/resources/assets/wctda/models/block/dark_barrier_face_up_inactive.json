@@ -1,0 +1,31 @@
+{
+  "loader": "fusion:model",
+  "type": "connecting",
+  "parent": "block/block",
+  "textures": {
+    "up": "wctda:block/dark_barrier_inactive_ctm",
+    "particle": "wctda:block/dark_barrier_inactive_ctm"
+  },
+  "connections": [
+    {
+      "type": "match_state",
+      "block": "wctda:dark_barrier",
+      "properties": {
+        "up": ["false"]
+      }
+    }
+  ],
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "up": {
+          "uv": [0, 0, 16, 16],
+          "texture": "#up",
+          "cullface": "up"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "wctda:block/cloud_block"
+    }
+  }
+}

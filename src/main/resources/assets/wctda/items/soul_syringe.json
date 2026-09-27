@@ -1,0 +1,48 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "wctda:syringe_fill_level",
+    "scale": 1.0,
+    "entries": [
+      {
+        "threshold": 0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wctda:item/soul_syringe_0"
+        }
+      },
+      {
+        "threshold": 1,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wctda:item/soul_syringe_1"
+        }
+      },
+      {
+        "threshold": 2,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wctda:item/soul_syringe_2"
+        }
+      },
+      {
+        "threshold": 3,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wctda:item/soul_syringe_3"
+        }
+      },
+      {
+        "threshold": 4,
+        "model": {
+          "type": "minecraft:model",
+          "model": "wctda:item/soul_syringe_4"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "wctda:item/soul_syringe_0"
+    }
+  }
+}

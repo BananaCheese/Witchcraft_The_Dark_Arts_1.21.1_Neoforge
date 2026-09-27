@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "wctda:block/dark_barrier_inactive_ctm"
+  }
+}
