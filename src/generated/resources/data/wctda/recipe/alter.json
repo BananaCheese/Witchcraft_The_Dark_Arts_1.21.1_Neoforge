@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:cobblestone"
+    },
+    "O": {
+      "item": "minecraft:crying_obsidian"
+    }
+  },
+  "pattern": [
+    "COC",
+    "COC",
+    "CCC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wctda:alter"
+  }
+}

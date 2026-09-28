@@ -13,7 +13,7 @@ public class WitchcraftTheDarkArtsClient {
     public static void init(IEventBus modBus) {
     }
 
-    private WitchcraftTheDarkArtsClient(ModContainer container) {
+    public WitchcraftTheDarkArtsClient(ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 }

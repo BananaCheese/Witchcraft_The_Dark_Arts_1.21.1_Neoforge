@@ -31,6 +31,8 @@ public class WitchcraftTheDarkArts {
         WTBlocks.BLOCK_ITEMS.register(modEventBus);
         WTBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
 
+        modEventBus.addListener(net.bananacheese.witchcraft.datagen.WTDataGenerators::gatherData);
+
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {

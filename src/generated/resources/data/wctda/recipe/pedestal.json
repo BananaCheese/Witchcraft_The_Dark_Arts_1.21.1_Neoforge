@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:cobblestone"
+    },
+    "O": {
+      "item": "minecraft:crying_obsidian"
+    },
+    "R": {
+      "item": "minecraft:red_carpet"
+    }
+  },
+  "pattern": [
+    "ORO",
+    " C ",
+    "CCC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wctda:pedestal"
+  }
+}

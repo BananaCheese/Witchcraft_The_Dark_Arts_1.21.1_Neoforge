@@ -3,11 +3,8 @@ package net.bananacheese.witchcraft.datagen;
 import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.item.WTItems;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.registries.DeferredItem;
 
 public class WTItemModelProvider extends ItemModelProvider {
 
@@ -17,13 +14,8 @@ public class WTItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-
-        handheldItem(WTItems.DARK_CRYSTAL);
-    }
-
-    private ItemModelBuilder handheldItem(DeferredItem<?> item) {
-        return withExistingParent(item.getId().getPath(),
-                ResourceLocation.parse("item/handheld")).texture("layer0",
-                ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID,"item/" + item.getId().getPath()));
+        // TODO: register item models as the magic items are ported, e.g.
+        //   handheldItem(WTItems.ALTER_ANALYZER.get());
+        basicItem(WTItems.DARK_CRYSTAL.get());
     }
 }
