@@ -2,9 +2,11 @@ package net.bananacheese.witchcraft.block;
 
 import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.block.custom.BarrierFieldBlock;
+import net.bananacheese.witchcraft.block.custom.CloudBlock;
 import net.bananacheese.witchcraft.block.custom.DarkBarrierBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -12,9 +14,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class WTBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
-            DeferredRegister.createBlocks(WitchcraftTheDarkArts.MODID);
+            DeferredRegister.createBlocks(WitchcraftTheDarkArts.MOD_ID);
     public static final DeferredRegister.Items BLOCK_ITEMS =
-            DeferredRegister.createItems(WitchcraftTheDarkArts.MODID);
+            DeferredRegister.createItems(WitchcraftTheDarkArts.MOD_ID);
 
     public static final DeferredBlock<net.bananacheese.witchcraft.block.custom.AlterBlock> ALTER = BLOCKS.registerBlock(
             "alter", net.bananacheese.witchcraft.block.custom.AlterBlock::new,
@@ -31,14 +33,16 @@ public final class WTBlocks {
     // No block item — matches the original's registerBlockWithoutBlockItem.
     public static final DeferredBlock<BarrierFieldBlock> BARRIER_FIELD = BLOCKS.register(
             "barrier_field", () -> new BarrierFieldBlock(BlockBehaviour.Properties.of()
-                    .strength(-1.0f, 3600000.0f)
-                    .noLootTable()
-                    .noCollission()
-                    .noOcclusion()));
+                    .strength(-1.0f, 3600000.0f).noLootTable().noCollission().noOcclusion()));
+
+    public static final DeferredBlock<CloudBlock> CLOUD_BLOCK = BLOCKS.registerBlock(
+            "cloud_block", CloudBlock::new,
+            BlockBehaviour.Properties.of().strength(0.5f).sound(SoundType.WOOL).noOcclusion().isValidSpawn((state, level, pos, type) -> false));
 
     public static final DeferredHolder<Item, BlockItem> ALTER_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(ALTER);
     public static final DeferredHolder<Item, BlockItem> PEDESTAL_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(PEDESTAL);
     public static final DeferredHolder<Item, BlockItem> DARK_BARRIER_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(DARK_BARRIER);
+    public static final DeferredHolder<Item, BlockItem> CLOUD_BLOCK_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(CLOUD_BLOCK);
 
     private WTBlocks() {
     }

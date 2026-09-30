@@ -6,15 +6,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class PedestalBlock extends BaseEntityBlock {
+public class PedestalBlock extends Block implements EntityBlock {
+    private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 13, 12);
     public static final MapCodec<PedestalBlock> CODEC = simpleCodec(PedestalBlock::new);
 
     public PedestalBlock(Properties properties) {
@@ -22,8 +28,13 @@ public class PedestalBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
+    protected MapCodec<? extends PedestalBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return SHAPE;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.bananacheese.witchcraft.datagen;
 
 import net.bananacheese.witchcraft.block.WTBlocks;
+import net.bananacheese.witchcraft.item.WTItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -40,7 +41,16 @@ public class WTRecipeProvider extends RecipeProvider {
 
         // TODO once WTItems exists:
         // SOUL_SYRINGE:  " GI" / " XG" / "I  "  with G=gold ingot, I=iron ingot, X=glass pane
-        // DARK_BARRIER (x8): "BRB" / "ADA" / "BRB" with B=blackstone, R=redstone block,
-        //                    A=amethyst block, D=dark crystal
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, WTBlocks.DARK_BARRIER.get())
+                .pattern("BRB")
+                .pattern("ADA")
+                .pattern("BRB")
+                .define('B', Items.BLACKSTONE)
+                .define('R', Items.REDSTONE_BLOCK)
+                .define('A', Items.AMETHYST_BLOCK)
+                .define('D', WTItems.DARK_CRYSTAL)
+                .unlockedBy("has_dark_crystal", has(WTItems.DARK_CRYSTAL))
+                .save(output);
     }
 }
