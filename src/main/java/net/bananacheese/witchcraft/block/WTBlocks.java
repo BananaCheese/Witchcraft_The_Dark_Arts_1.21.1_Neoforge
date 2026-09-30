@@ -14,9 +14,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class WTBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
-            DeferredRegister.createBlocks(WitchcraftTheDarkArts.MOD_ID);
+            DeferredRegister.createBlocks(WitchcraftTheDarkArts.MODID);
     public static final DeferredRegister.Items BLOCK_ITEMS =
-            DeferredRegister.createItems(WitchcraftTheDarkArts.MOD_ID);
+            DeferredRegister.createItems(WitchcraftTheDarkArts.MODID);
 
     public static final DeferredBlock<net.bananacheese.witchcraft.block.custom.AlterBlock> ALTER = BLOCKS.registerBlock(
             "alter", net.bananacheese.witchcraft.block.custom.AlterBlock::new,

@@ -5,6 +5,7 @@
   "textures": {
     "all": "wctda:block/cloud_block_ctm"
   },
+  "render_type": "minecraft:translucent",
   "connections": [
     {
       "type": "is_same_block"

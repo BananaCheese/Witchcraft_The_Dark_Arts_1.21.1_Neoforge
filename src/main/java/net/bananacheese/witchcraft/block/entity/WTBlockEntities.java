@@ -11,7 +11,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class WTBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
-            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, WitchcraftTheDarkArts.MOD_ID);
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, WitchcraftTheDarkArts.MODID);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AlterBlockEntity>> ALTER_BE =
             BLOCK_ENTITY_TYPES.register("alter_be",

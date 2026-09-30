@@ -14,7 +14,7 @@ public class WTBlockTagProvider extends BlockTagsProvider {
 
     public WTBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
                               ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, WitchcraftTheDarkArts.MOD_ID, existingFileHelper);
+        super(output, lookupProvider, WitchcraftTheDarkArts.MODID, existingFileHelper);
     }
 
     @Override

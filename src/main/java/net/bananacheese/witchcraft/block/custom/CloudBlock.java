@@ -77,14 +77,14 @@ public class CloudBlock extends ConnectedTextureBlock {
     }
 
     @Override
-    protected boolean skipRendering(BlockState state, BlockState adjacentState, Direction direction) {
-        if (adjacentState.is(this)) {
-            if (direction == Direction.UP || direction == Direction.DOWN) {
+    protected boolean skipRendering(BlockState state, BlockState otherState, Direction direction) {
+        if (otherState.is(this)) {
+            if (direction == Direction.UP) {
                 return false;
             }
             return true;
         }
-        return super.skipRendering(state, adjacentState, direction);
+        return super.skipRendering(state, otherState, direction);
     }
 
     public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
@@ -113,7 +113,7 @@ public class CloudBlock extends ConnectedTextureBlock {
         windCharge.setDeltaMovement(0, -0.5, 0);
         level.addFreshEntity(windCharge);
 
-        player.setDeltaMovement(player.getDeltaMovement().x, 1.5, player.getDeltaMovement().z);
+        player.setDeltaMovement(player.getDeltaMovement().x, player.getDeltaMovement().y, player.getDeltaMovement().z);
         player.hurtMarked = true;
 
         level.playSound(

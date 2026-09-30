@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class WTItemGroup {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, WitchcraftTheDarkArts.MOD_ID);
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, WitchcraftTheDarkArts.MODID);
 
     public static final Supplier<CreativeModeTab> WCTDA = CREATIVE_MODE_TABS.register("wctda",
             () -> CreativeModeTab.builder().title(Component.translatable("creativetab.wctda")).icon(() -> new ItemStack(WTItems.DARK_CRYSTAL.get())).displayItems((pParameters, pOutput) -> {

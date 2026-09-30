@@ -8,13 +8,15 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
-@Mod(value = WitchcraftTheDarkArts.MOD_ID, dist = Dist.CLIENT)
+@Mod(value = WitchcraftTheDarkArts.MODID, dist = Dist.CLIENT)
+@EventBusSubscriber(modid = WitchcraftTheDarkArts.MODID, value = Dist.CLIENT)
 public class WitchcraftTheDarkArtsClient {
 
     public static void init(IEventBus modBus) {

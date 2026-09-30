@@ -2,6 +2,9 @@ package net.bananacheese.witchcraft;
 
 import net.bananacheese.witchcraft.block.WTBlocks;
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
+import net.bananacheese.witchcraft.datagen.WTDataGenerators;
+import net.bananacheese.witchcraft.event.PlayerDeathHandler;
+import net.bananacheese.witchcraft.event.WTCloudEvents;
 import net.bananacheese.witchcraft.item.WTItemGroup;
 import net.bananacheese.witchcraft.item.WTItems;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -17,9 +20,9 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
-@Mod(WitchcraftTheDarkArts.MOD_ID)
+@Mod(WitchcraftTheDarkArts.MODID)
 public class WitchcraftTheDarkArts {
-    public static final String MOD_ID = "wctda";
+    public static final String MODID = "wctda";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public WitchcraftTheDarkArts(IEventBus modEventBus, ModContainer modContainer) {
@@ -32,9 +35,11 @@ public class WitchcraftTheDarkArts {
         WTBlocks.BLOCK_ITEMS.register(modEventBus);
         WTBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
 
-        modEventBus.addListener(net.bananacheese.witchcraft.datagen.WTDataGenerators::gatherData);
+        modEventBus.addListener(WTDataGenerators::gatherData);
 
-        NeoForge.EVENT_BUS.addListener(net.bananacheese.witchcraft.event.WTCloudEvents::onLivingJump);
+        NeoForge.EVENT_BUS.addListener(WTCloudEvents::onLivingJump);
+
+        NeoForge.EVENT_BUS.addListener(PlayerDeathHandler::onPlayerDeath);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
