@@ -26,6 +26,14 @@ public class PedestalBlockEntity extends BlockEntity {
     public void setHeldItem(ItemStack stack) {
         this.heldItem = stack;
         setChanged();
+
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(
+                    worldPosition,
+                    getBlockState(),
+                    getBlockState(),
+                    3);
+        }
     }
 
     @Override

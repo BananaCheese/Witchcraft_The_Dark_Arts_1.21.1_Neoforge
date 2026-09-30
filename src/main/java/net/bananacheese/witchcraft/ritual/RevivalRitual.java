@@ -1,57 +1,41 @@
 package net.bananacheese.witchcraft.ritual;
 
 import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
+import net.bananacheese.witchcraft.block.entity.custom.PedestalBlockEntity;
 import net.bananacheese.witchcraft.item.custom.SoulSyringe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public final class RevivalRitual {
-    private static final int REQUIRED_FLUID = 1000;
-
     public static boolean perform(
             ServerLevel level,
             BlockPos pos,
             AlterBlockEntity altar,
+            int requiredFluid,
+            List<Ingredient> requiredPedestalItems,
             @Nullable ServerPlayer performer) {
 
-        if (AlterTier.getHighestValidTier(level, pos).getLevel() < 4) {
-            message(performer,
-                    "§c✗ This altar is not powerful enough! Required: Tier 4 (Supreme Altar)");
-            return false;
-        }
-
         ItemStack syringe = altar.getHeldItem();
-        if (!(syringe.getItem() instanceof SoulSyringe)
-                || SoulSyringe.getFillLevel(syringe) < 4) {
-            message(performer,
-                    "§c✗ The Soul Syringe is not fully charged! (4/4 required)");
-            return false;
-        }
-
-        if (altar.getFluidAmount() < REQUIRED_FLUID) {
-            message(performer,
-                    "§c✗ The altar needs 1000 mB of water!");
-            return false;
-        }
-
         UUID targetId = SoulSyringe.getTargetPlayer(syringe);
+
         if (targetId == null) {
-            message(performer,
-                    "§c✗ The Soul Syringe has no target player!");
+            message(performer, "§c✗ The Soul Syringe has no target player!");
             return false;
         }
 
         ServerPlayer target = level.getServer().getPlayerList().getPlayer(targetId);
         if (target == null) {
-            message(performer,
-                    "§c✗ Target player is not online!");
+            message(performer, "§c✗ Target player is not online!");
             return false;
         }
 
@@ -61,7 +45,18 @@ public final class RevivalRitual {
             return false;
         }
 
-        altar.consumeFluid(REQUIRED_FLUID);
+        if (!hasPedestalIngredients(level, pos, requiredPedestalItems)) {
+            message(performer, "§c✗ The revival ritual is missing its ingredients!");
+            return false;
+        }
+
+        if (altar.getFluidAmount() < requiredFluid) {
+            message(performer, "§c✗ The altar needs " + requiredFluid + " mB of water!");
+            return false;
+        }
+
+        altar.consumeFluid(requiredFluid);
+        consumePedestals(level, pos, requiredPedestalItems);
         altar.setHeldItem(ItemStack.EMPTY);
 
         target.setGameMode(GameType.SURVIVAL);
@@ -91,6 +86,99 @@ public final class RevivalRitual {
                         + " has been brought back from the dead!"), false);
 
         return true;
+    }
+
+    private static boolean hasPedestalIngredients(
+            ServerLevel level,
+            BlockPos pos,
+            List<Ingredient> required) {
+        List<ItemStack> available = pedestalStacks(level, pos);
+
+        if (available.size() < required.size()) {
+            return false;
+        }
+
+        for (Ingredient ingredient : required) {
+            int matchingIndex = -1;
+
+            for (int i = 0; i < available.size(); i++) {
+                if (ingredient.test(available.get(i))) {
+                    matchingIndex = i;
+                    break;
+                }
+            }
+
+            if (matchingIndex < 0) {
+                return false;
+            }
+
+            available.remove(matchingIndex);
+        }
+
+        return true;
+    }
+
+    private static void consumePedestals(
+            ServerLevel level,
+            BlockPos pos,
+            List<Ingredient> required) {
+        List<BlockPos> positions = pedestalPositions(pos);
+        boolean[] used = new boolean[positions.size()];
+
+        for (Ingredient ingredient : required) {
+            for (int i = 0; i < positions.size(); i++) {
+                if (used[i]) {
+                    continue;
+                }
+
+                if (!(level.getBlockEntity(positions.get(i))
+                        instanceof PedestalBlockEntity pedestal)) {
+                    continue;
+                }
+
+                if (!ingredient.test(pedestal.getHeldItem())) {
+                    continue;
+                }
+
+                pedestal.setHeldItem(ItemStack.EMPTY);
+                used[i] = true;
+                break;
+            }
+        }
+    }
+
+    private static List<ItemStack> pedestalStacks(ServerLevel level, BlockPos pos) {
+        List<ItemStack> stacks = new ArrayList<>();
+
+        for (BlockPos pedestalPos : pedestalPositions(pos)) {
+            if (level.getBlockEntity(pedestalPos)
+                    instanceof PedestalBlockEntity pedestal
+                    && !pedestal.getHeldItem().isEmpty()) {
+                stacks.add(pedestal.getHeldItem().copy());
+            }
+        }
+
+        return stacks;
+    }
+
+    private static List<BlockPos> pedestalPositions(BlockPos altarPos) {
+        int[][] offsets = {
+                {3, 0, 0},
+                {-3, 0, 0},
+                {0, 0, 3},
+                {0, 0, -3},
+                {2, 0, 2},
+                {2, 0, -2},
+                {-2, 0, 2},
+                {-2, 0, -2}
+        };
+
+        List<BlockPos> positions = new ArrayList<>(offsets.length);
+        for (int[] offset : offsets) {
+            positions.add(altarPos.offset(offset[0], offset[1], offset[2]));
+        }
+
+        return positions;
     }
 
     private static void message(@Nullable ServerPlayer player, String text) {

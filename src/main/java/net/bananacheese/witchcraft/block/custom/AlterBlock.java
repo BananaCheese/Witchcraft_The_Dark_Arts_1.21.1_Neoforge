@@ -114,12 +114,33 @@ public class AlterBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
-        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
-        if (!level.isClientSide
-                && level.getBlockEntity(pos) instanceof AlterBlockEntity altar
-                && level.hasNeighborSignal(pos)) {
+    protected void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+        super.neighborChanged(
+                state,
+                level,
+                pos,
+                neighborBlock,
+                neighborPos,
+                movedByPiston);
+
+        if (level.isClientSide
+                || !(level.getBlockEntity(pos) instanceof AlterBlockEntity altar)) {
+            return;
+        }
+
+        boolean powered = level.hasNeighborSignal(pos);
+
+        if (powered && !altar.wasPowered()) {
+            altar.setPowered(true);
             RitualHandler.attemptRitual(level, pos, altar);
+        } else if (!powered) {
+            altar.setPowered(false);
         }
     }
 }

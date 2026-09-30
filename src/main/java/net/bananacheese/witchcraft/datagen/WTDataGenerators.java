@@ -22,7 +22,7 @@ public final class WTDataGenerators {
 
         generator.addProvider(event.includeClient(), new WTItemModelProvider(output, existingFileHelper));
 
-        // TODO: WTRitualRecipeProvider once the ritual recipe type is ported.
+        generator.addProvider(event.includeServer(), new WTRitualRecipeProvider(output, lookupProvider));
     }
 
     private WTDataGenerators() {

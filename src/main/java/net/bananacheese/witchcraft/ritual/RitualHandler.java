@@ -4,6 +4,10 @@ import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
 import net.bananacheese.witchcraft.block.entity.custom.PedestalBlockEntity;
 import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.item.custom.SoulSyringe;
+import net.bananacheese.witchcraft.recipe.RevivalRitualRecipe;
+import net.bananacheese.witchcraft.recipe.RitualRecipe;
+import net.bananacheese.witchcraft.recipe.RitualRecipeInput;
+import net.bananacheese.witchcraft.recipe.WTRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -11,25 +15,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public final class RitualHandler {
-    private static final int REQUIRED_WATER = 1000;
-
-    private static final List<Ingredient> DARK_CRYSTAL_INGREDIENTS = List.of(
-            Ingredient.of(Items.REDSTONE_BLOCK),
-            Ingredient.of(Items.REDSTONE_BLOCK),
-            Ingredient.of(Items.AMETHYST_BLOCK),
-            Ingredient.of(Items.AMETHYST_BLOCK),
-            Ingredient.of(Items.SCULK),
-            Ingredient.of(Items.SCULK),
-            Ingredient.of(Items.SCULK),
-            Ingredient.of(Items.SCULK)
-    );
-
     public static boolean attemptRitual(
             Level level,
             BlockPos pos,
@@ -38,24 +31,42 @@ public final class RitualHandler {
             return false;
         }
 
-        ServerPlayer performer = findPerformer(serverLevel, pos);
-        ItemStack heldItem = altar.getHeldItem();
+        int tier = AlterTier.getHighestValidTier(serverLevel, pos).getLevel();
+        RitualRecipeInput input = createInput(serverLevel, pos, altar, tier);
 
-        if (heldItem.getItem() instanceof SoulSyringe) {
-            return RevivalRitual.perform(
-                    serverLevel, pos, altar, performer);
-        }
+        Optional<RecipeHolder<RitualRecipe>> ritual =
+                serverLevel.getRecipeManager().getRecipeFor(
+                        WTRecipes.RITUAL_TYPE.get(), input, serverLevel);
 
-        if (heldItem.is(Items.GOLD_INGOT)
-                && altar.getFluidAmount() >= REQUIRED_WATER) {
-            return AlterAnalyzerRitual.perform(serverLevel, pos, altar);
-        }
+        if (ritual.isPresent()) {
+            RitualRecipe recipe = ritual.get().value();
+            consumeInputs(serverLevel, pos, altar, recipe.getFluidAmount(), recipe.getPedestalItems());
+            altar.setHeldItem(recipe.getResult());
+            RitualEffects.play(serverLevel, pos, recipe.getEffectName());
 
-        if (canPerformDarkCrystalRitual(serverLevel, pos, altar)) {
-            performDarkCrystalRitual(serverLevel, pos, altar, performer);
+            ServerPlayer performer = findPerformer(serverLevel, pos);
+            if (performer != null) {
+                performer.sendSystemMessage(Component.literal("§a✓ Ritual complete!"));
+            }
+
             return true;
         }
 
+        Optional<net.minecraft.world.item.crafting.RecipeHolder<RevivalRitualRecipe>> revival =
+                serverLevel.getRecipeManager().getRecipeFor(
+                        WTRecipes.REVIVAL_TYPE.get(), input, serverLevel);
+
+        if (revival.isPresent()) {
+            return RevivalRitual.perform(
+                    serverLevel,
+                    pos,
+                    altar,
+                    revival.get().value().getFluidAmount(),
+                    revival.get().value().getPedestalItems(),
+                    findPerformer(serverLevel, pos));
+        }
+
+        ServerPlayer performer = findPerformer(serverLevel, pos);
         if (performer != null) {
             performer.displayClientMessage(
                     Component.literal("§c✗ No valid ritual found"), true);
@@ -64,70 +75,42 @@ public final class RitualHandler {
         return false;
     }
 
-    private static boolean canPerformDarkCrystalRitual(
-            ServerLevel level,
-            BlockPos pos,
-            AlterBlockEntity altar) {
-        return altar.getHeldItem().is(Items.CRYING_OBSIDIAN)
-                && altar.getFluidAmount() == 0
-                && AlterTier.getHighestValidTier(level, pos).getLevel() >= 4
-                && hasPedestalIngredients(
-                        level, pos, DARK_CRYSTAL_INGREDIENTS);
-    }
-
-    private static void performDarkCrystalRitual(
+    private static RitualRecipeInput createInput(
             ServerLevel level,
             BlockPos pos,
             AlterBlockEntity altar,
-            ServerPlayer performer) {
-        consumePedestals(level, pos, DARK_CRYSTAL_INGREDIENTS);
-        altar.setHeldItem(new ItemStack(WTItems.DARK_CRYSTAL.get()));
-        RitualEffects.play(level, pos, "dark");
+            int tier) {
+        List<ItemStack> pedestalItems = new ArrayList<>();
 
-        if (performer != null) {
-            performer.sendSystemMessage(
-                    Component.literal("§a✓ Ritual complete!"));
+        for (BlockPos pedestalPos : pedestalPositions(pos)) {
+            if (level.getBlockEntity(pedestalPos)
+                    instanceof PedestalBlockEntity pedestal
+                    && !pedestal.getHeldItem().isEmpty()) {
+                pedestalItems.add(pedestal.getHeldItem().copy());
+            }
         }
+
+        return new RitualRecipeInput(
+                altar.getHeldItem(),
+                altar.getFluidAmount(),
+                tier,
+                pedestalItems);
     }
 
-    private static boolean hasPedestalIngredients(
+    private static void consumeInputs(
             ServerLevel level,
             BlockPos pos,
-            List<Ingredient> required) {
-        List<ItemStack> available = pedestalStacks(level, pos);
-
-        if (available.size() < required.size()) {
-            return false;
+            AlterBlockEntity altar,
+            int fluidAmount,
+            List<Ingredient> ingredients) {
+        if (fluidAmount > 0) {
+            altar.consumeFluid(fluidAmount);
         }
 
-        for (Ingredient ingredient : required) {
-            int matchingIndex = -1;
-
-            for (int i = 0; i < available.size(); i++) {
-                if (ingredient.test(available.get(i))) {
-                    matchingIndex = i;
-                    break;
-                }
-            }
-
-            if (matchingIndex < 0) {
-                return false;
-            }
-
-            available.remove(matchingIndex);
-        }
-
-        return true;
-    }
-
-    private static void consumePedestals(
-            ServerLevel level,
-            BlockPos pos,
-            List<Ingredient> required) {
         List<BlockPos> positions = pedestalPositions(pos);
         boolean[] used = new boolean[positions.size()];
 
-        for (Ingredient ingredient : required) {
+        for (Ingredient ingredient : ingredients) {
             for (int i = 0; i < positions.size(); i++) {
                 if (used[i]) {
                     continue;
@@ -149,22 +132,6 @@ public final class RitualHandler {
         }
     }
 
-    private static List<ItemStack> pedestalStacks(
-            ServerLevel level,
-            BlockPos pos) {
-        List<ItemStack> stacks = new ArrayList<>();
-
-        for (BlockPos pedestalPos : pedestalPositions(pos)) {
-            if (level.getBlockEntity(pedestalPos)
-                    instanceof PedestalBlockEntity pedestal
-                    && !pedestal.getHeldItem().isEmpty()) {
-                stacks.add(pedestal.getHeldItem().copy());
-            }
-        }
-
-        return stacks;
-    }
-
     private static List<BlockPos> pedestalPositions(BlockPos altarPos) {
         int[][] offsets = {
                 {3, 0, 0},
@@ -179,16 +146,13 @@ public final class RitualHandler {
 
         List<BlockPos> positions = new ArrayList<>(offsets.length);
         for (int[] offset : offsets) {
-            positions.add(altarPos.offset(
-                    offset[0], offset[1], offset[2]));
+            positions.add(altarPos.offset(offset[0], offset[1], offset[2]));
         }
 
         return positions;
     }
 
-    private static ServerPlayer findPerformer(
-            ServerLevel level,
-            BlockPos pos) {
+    private static ServerPlayer findPerformer(ServerLevel level, BlockPos pos) {
         ServerPlayer closestPlayer = null;
         double closestDistance = 64.0D;
 

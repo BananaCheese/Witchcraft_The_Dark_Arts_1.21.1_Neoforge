@@ -7,6 +7,7 @@ import net.bananacheese.witchcraft.event.PlayerDeathHandler;
 import net.bananacheese.witchcraft.event.WTCloudEvents;
 import net.bananacheese.witchcraft.item.WTItemGroup;
 import net.bananacheese.witchcraft.item.WTItems;
+import net.bananacheese.witchcraft.recipe.WTRecipes;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class WitchcraftTheDarkArts {
         WTBlocks.BLOCKS.register(modEventBus);
         WTBlocks.BLOCK_ITEMS.register(modEventBus);
         WTBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
+
+        WTRecipes.RECIPE_TYPES.register(modEventBus);
+        WTRecipes.RECIPE_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(WTDataGenerators::gatherData);
 
