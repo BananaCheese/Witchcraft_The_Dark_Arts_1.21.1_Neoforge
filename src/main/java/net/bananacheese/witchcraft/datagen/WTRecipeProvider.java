@@ -39,8 +39,15 @@ public class WTRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_crying_obsidian", has(Items.CRYING_OBSIDIAN))
                 .save(output);
 
-        // TODO once WTItems exists:
-        // SOUL_SYRINGE:  " GI" / " XG" / "I  "  with G=gold ingot, I=iron ingot, X=glass pane
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC,WTItems.SOUL_SYRINGE.get())
+                .pattern(" GI")
+                .pattern(" XG")
+                .pattern("I  ")
+                .define('G',Items.GOLD_INGOT)
+                .define('I',Items.IRON_INGOT)
+                .define('X',Items.GLASS_PANE)
+                .unlockedBy("has_gold_ingot",has(Items.GOLD_INGOT))
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, WTBlocks.DARK_BARRIER.get())
                 .pattern("BRB")

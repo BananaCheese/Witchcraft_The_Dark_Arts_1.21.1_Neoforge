@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "X": {
+      "item": "minecraft:glass_pane"
+    }
+  },
+  "pattern": [
+    " GI",
+    " XG",
+    "I  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "wctda:soul_syringe"
+  }
+}

@@ -1,6 +1,1 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "wctda:item/soul_syringe_2"
-  }
-}
+{"parent":"minecraft:item/generated","textures":{"layer0":"wctda:item/soul_syringe_2"}}

@@ -14,8 +14,7 @@ public class WTItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        // TODO: register item models as the magic items are ported, e.g.
-        //   handheldItem(WTItems.ALTER_ANALYZER.get());
+        handheldItem(WTItems.ALTER_ANALYZER.get());
         basicItem(WTItems.DARK_CRYSTAL.get());
     }
 }

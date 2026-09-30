@@ -19,6 +19,8 @@ public class WTItemGroup {
             () -> CreativeModeTab.builder().title(Component.translatable("creativetab.wctda")).icon(() -> new ItemStack(WTItems.DARK_CRYSTAL.get())).displayItems((pParameters, pOutput) -> {
 
                 pOutput.accept(WTItems.DARK_CRYSTAL);
+                pOutput.accept(WTItems.SOUL_SYRINGE);
+                pOutput.accept(WTItems.ALTER_ANALYZER);
 
                 pOutput.accept(WTBlocks.ALTER);
                 pOutput.accept(WTBlocks.PEDESTAL);
