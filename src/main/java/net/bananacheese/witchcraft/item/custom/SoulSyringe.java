@@ -1,6 +1,7 @@
 package net.bananacheese.witchcraft.item.custom;
 
 import net.bananacheese.witchcraft.component.WTComponents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -11,12 +12,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.PlayerHeadBlock;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 public class SoulSyringe extends Item {
@@ -27,7 +30,7 @@ public class SoulSyringe extends Item {
     }
 
     @Override
-    public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (attacker instanceof Player player
                 && !player.level().isClientSide
                 && getFillLevel(stack) == 0) {
@@ -36,28 +39,31 @@ public class SoulSyringe extends Item {
                     Component.literal("Soul Syringe: Slot 1 filled (Combat)"), true);
         }
 
-        super.postHurtEnemy(stack, target, attacker);
+        return super.hurtEnemy(stack, target, attacker);
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(
-            Level level, Player player, InteractionHand hand) {
+            Level level,
+            Player player,
+            InteractionHand hand) {
+
         ItemStack stack = player.getItemInHand(hand);
         ItemStack offhand = player.getOffhandItem();
 
-        if (!level.isClientSide && hand == InteractionHand.MAIN_HAND) {
+        if (!level.isClientSide) {
             int currentLevel = getFillLevel(stack);
 
-            // Slot 1 -> Slot 2: sneak-right-click and sacrifice one heart.
             if (player.isShiftKeyDown() && currentLevel == 1) {
                 setFillLevel(stack, 2);
                 player.hurt(level.damageSources().magic(), 2.0F);
+
                 player.displayClientMessage(
                         Component.literal("Soul Syringe: Slot 2 filled (Essence)"), true);
+
                 return InteractionResultHolder.success(stack);
             }
 
-            // Slot 3 -> Slot 4: provide the required biomass in the offhand.
             if (currentLevel == 3 && !offhand.isEmpty()) {
                 BiomassType biomassType = getBiomassType(offhand);
 
@@ -67,14 +73,19 @@ public class SoulSyringe extends Item {
                     if (offhand.getCount() >= requiredAmount) {
                         offhand.shrink(requiredAmount);
                         setFillLevel(stack, 4);
+
                         player.displayClientMessage(
                                 Component.literal("Soul Syringe: Slot 4 filled (Biomass)"), true);
+
                         return InteractionResultHolder.success(stack);
                     }
 
                     player.displayClientMessage(
-                            Component.literal("§cNeed " + requiredAmount + " "
+                            Component.literal("§cNeed "
+                                    + requiredAmount
+                                    + " "
                                     + offhand.getHoverName().getString()), true);
+
                     return InteractionResultHolder.fail(stack);
                 }
             }
@@ -103,6 +114,7 @@ public class SoulSyringe extends Item {
         }
 
         var profile = skull.getOwnerProfile();
+
         if (profile == null || profile.id().isEmpty()) {
             player.displayClientMessage(
                     Component.literal("§cThis head has no owner data!"), true);
@@ -117,10 +129,84 @@ public class SoulSyringe extends Item {
         setFillLevel(stack, 3);
 
         player.displayClientMessage(
-                Component.literal("Soul Syringe: Slot 3 filled (Target: " + targetName + ")"), true);
+                Component.literal(
+                        "Soul Syringe: Slot 3 filled (Target: " + targetName + ")"),
+                true);
+
         level.removeBlock(pos, false);
 
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            List<Component> tooltipComponents,
+            TooltipFlag tooltipFlag) {
+
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+
+        int fillLevel = getFillLevel(stack);
+
+        tooltipComponents.add(
+                Component.literal("Fill Level: " + fillLevel + "/" + MAX_FILL_LEVEL)
+                        .withStyle(ChatFormatting.GRAY));
+
+        switch (fillLevel) {
+            case 0 -> tooltipComponents.add(
+                    Component.literal("Next: Attack a living creature")
+                            .withStyle(ChatFormatting.YELLOW));
+
+            case 1 -> {
+                tooltipComponents.add(
+                        Component.literal("Next: Sneak + right-click")
+                                .withStyle(ChatFormatting.YELLOW));
+                tooltipComponents.add(
+                        Component.literal("Sacrifices 1 heart")
+                                .withStyle(ChatFormatting.GRAY));
+            }
+
+            case 2 -> tooltipComponents.add(
+                    Component.literal("Next: Use on a player head")
+                            .withStyle(ChatFormatting.YELLOW));
+
+            case 3 -> {
+                tooltipComponents.add(
+                        Component.literal("Next: Right-click with biomass in offhand")
+                                .withStyle(ChatFormatting.YELLOW));
+                tooltipComponents.add(
+                        Component.literal("32 meat or 64 plant matter")
+                                .withStyle(ChatFormatting.GRAY));
+
+                String targetName = getTargetName(stack);
+                if (targetName != null && !targetName.isBlank()) {
+                    tooltipComponents.add(
+                            Component.literal("Target: " + targetName)
+                                    .withStyle(ChatFormatting.GRAY));
+                }
+            }
+
+            case 4 -> {
+                tooltipComponents.add(
+                        Component.literal("Ready for the Revival Ritual")
+                                .withStyle(ChatFormatting.GREEN));
+
+                String targetName = getTargetName(stack);
+                if (targetName != null && !targetName.isBlank()) {
+                    tooltipComponents.add(
+                            Component.literal("Target: " + targetName)
+                                    .withStyle(ChatFormatting.GRAY));
+                }
+
+                tooltipComponents.add(
+                        Component.literal("Requires a Tier 4 Altar")
+                                .withStyle(ChatFormatting.GRAY));
+            }
+
+            default -> {
+            }
+        }
     }
 
     public static int getFillLevel(ItemStack stack) {
@@ -128,7 +214,9 @@ public class SoulSyringe extends Item {
     }
 
     public static void setFillLevel(ItemStack stack, int level) {
-        stack.set(WTComponents.SYRINGE_FILL_LEVEL, Math.min(level, MAX_FILL_LEVEL));
+        stack.set(
+                WTComponents.SYRINGE_FILL_LEVEL,
+                Math.min(level, MAX_FILL_LEVEL));
     }
 
     @Nullable

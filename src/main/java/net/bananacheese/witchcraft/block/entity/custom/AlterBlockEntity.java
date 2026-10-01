@@ -115,9 +115,8 @@ public class AlterBlockEntity extends BlockEntity {
         powered = tag.getBoolean("Powered");
 
         if (tag.contains("HeldItem")) {
-            heldItem = ItemStack.parseOptional(
-                    registries,
-                    tag.getCompound("HeldItem"));
+            heldItem = ItemStack.parseOptional(registries, tag.getCompound("HeldItem"));
+
         } else {
             heldItem = ItemStack.EMPTY;
         }
@@ -144,6 +143,8 @@ public class AlterBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, registries);
+        return tag;
     }
 }

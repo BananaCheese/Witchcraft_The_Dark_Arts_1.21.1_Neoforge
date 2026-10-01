@@ -2,6 +2,7 @@ package net.bananacheese.witchcraft;
 
 import net.bananacheese.witchcraft.block.WTBlocks;
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
+import net.bananacheese.witchcraft.component.WTComponents;
 import net.bananacheese.witchcraft.datagen.WTDataGenerators;
 import net.bananacheese.witchcraft.event.PlayerDeathHandler;
 import net.bananacheese.witchcraft.event.WTCloudEvents;
@@ -38,6 +39,7 @@ public class WitchcraftTheDarkArts {
 
         WTRecipes.RECIPE_TYPES.register(modEventBus);
         WTRecipes.RECIPE_SERIALIZERS.register(modEventBus);
+        WTComponents.COMPONENTS.register(modEventBus);
 
         modEventBus.addListener(WTDataGenerators::gatherData);
 

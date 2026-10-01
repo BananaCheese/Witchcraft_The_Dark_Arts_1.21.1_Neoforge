@@ -1,24 +1,33 @@
 {
-  "parent":"minecraft:item/generated",
-  "textures":{
-    "layer0":"wctda:item/soul_syringe_0"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wctda:item/soul_syringe_0"
   },
-  "overrides":[{"predicate":{"wctda:syringe_fill_level":0.25},
-    "model":"wctda:item/soul_syringe_1"
-  },
+  "overrides": [
     {
-      "predicate":{
-        "wctda:syringe_fill_level":0.5},
-      "model":"wctda:item/soul_syringe_2"
+      "predicate": {
+        "wctda:syringe_fill_level": 1
+      },
+      "model": "wctda:item/soul_syringe_1"
     },
     {
-      "predicate":{
-        "wctda:syringe_fill_level":0.75},
-      "model":"wctda:item/soul_syringe_3"
+      "predicate": {
+        "wctda:syringe_fill_level": 2
+      },
+      "model": "wctda:item/soul_syringe_2"
     },
-    {"predicate":{
-      "wctda:syringe_fill_level":1.0},
-      "model":"wctda:item/soul_syringe_4"
+    {
+      "predicate": {
+        "wctda:syringe_fill_level": 3
+      },
+      "model": "wctda:item/soul_syringe_3"
+    },
+    {
+      "predicate": {
+        "wctda:syringe_fill_level": 4
+      },
+      "model": "wctda:item/soul_syringe_4"
     }
   ]
 }
+
