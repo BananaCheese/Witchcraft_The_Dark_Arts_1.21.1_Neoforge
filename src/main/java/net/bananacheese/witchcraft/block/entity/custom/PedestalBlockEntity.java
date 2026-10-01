@@ -61,7 +61,7 @@ public class PedestalBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        
+
         creationTicks = tag.getInt("CreationTicks");
 
         if (tag.contains("HeldItem")) {
