@@ -1,0 +1,39 @@
+{
+  "type": "wctda:ritual",
+  "altar_item": {
+    "item": "minecraft:crying_obsidian"
+  },
+  "effect": "dark",
+  "fluid_amount": 0,
+  "min_tier": 4,
+  "pedestal_items": [
+    {
+      "item": "minecraft:redstone_block"
+    },
+    {
+      "item": "minecraft:redstone_block"
+    },
+    {
+      "item": "minecraft:amethyst_block"
+    },
+    {
+      "item": "minecraft:amethyst_block"
+    },
+    {
+      "item": "minecraft:sculk"
+    },
+    {
+      "item": "minecraft:sculk"
+    },
+    {
+      "item": "minecraft:sculk"
+    },
+    {
+      "item": "minecraft:sculk"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "wctda:dark_crystal"
+  }
+}

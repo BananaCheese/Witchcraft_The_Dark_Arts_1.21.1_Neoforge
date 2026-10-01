@@ -1,0 +1,14 @@
+{
+  "type": "wctda:ritual",
+  "altar_item": {
+    "item": "minecraft:gold_ingot"
+  },
+  "effect": "portal",
+  "fluid_amount": 1000,
+  "min_tier": 1,
+  "pedestal_items": [],
+  "result": {
+    "count": 1,
+    "id": "wctda:alter_analyzer"
+  }
+}

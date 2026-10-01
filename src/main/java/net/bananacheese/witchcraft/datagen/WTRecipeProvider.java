@@ -39,14 +39,14 @@ public class WTRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_crying_obsidian", has(Items.CRYING_OBSIDIAN))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC,WTItems.SOUL_SYRINGE.get())
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, WTItems.SOUL_SYRINGE.get())
                 .pattern(" GI")
                 .pattern(" XG")
                 .pattern("I  ")
-                .define('G',Items.GOLD_INGOT)
-                .define('I',Items.IRON_INGOT)
-                .define('X',Items.GLASS_PANE)
-                .unlockedBy("has_gold_ingot",has(Items.GOLD_INGOT))
+                .define('G', Items.GOLD_INGOT)
+                .define('I', Items.IRON_INGOT)
+                .define('X', Items.GLASS_PANE)
+                .unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, WTBlocks.DARK_BARRIER.get())
@@ -59,5 +59,8 @@ public class WTRecipeProvider extends RecipeProvider {
                 .define('D', WTItems.DARK_CRYSTAL)
                 .unlockedBy("has_dark_crystal", has(WTItems.DARK_CRYSTAL))
                 .save(output);
+
+        // Dedicated ritual recipe datagen.
+        WTRitualRecipeProvider.generate(output);
     }
 }

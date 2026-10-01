@@ -4,30 +4,26 @@ import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.recipe.RevivalRitualRecipe;
 import net.bananacheese.witchcraft.recipe.RitualRecipe;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.core.HolderLookup;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-public class WTRitualRecipeProvider extends RecipeProvider {
-    public WTRitualRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public final class WTRitualRecipeProvider {
 
-    @Override
-    protected void buildRecipes(RecipeOutput output) {
+    public static void generate(RecipeOutput output) {
+
         // Altar Analyzer Creation (Tier 1)
         createRitualRecipe(
                 output,
-                "altar_analyzer_creation", 1,
-                Items.GOLD_INGOT, 1000,
+                "altar_analyzer_creation",
+                1,
+                Items.GOLD_INGOT,
+                1000,
                 List.of(),
                 new ItemStack(WTItems.ALTER_ANALYZER.get()),
                 "portal");
@@ -35,8 +31,10 @@ public class WTRitualRecipeProvider extends RecipeProvider {
         // Dark Crystal Creation (Tier 4)
         createRitualRecipe(
                 output,
-                "dark_crystal_creation", 4,
-                Items.CRYING_OBSIDIAN, 0,
+                "dark_crystal_creation",
+                4,
+                Items.CRYING_OBSIDIAN,
+                0,
                 List.of(
                         Ingredient.of(Items.REDSTONE_BLOCK),
                         Ingredient.of(Items.REDSTONE_BLOCK),
@@ -52,8 +50,10 @@ public class WTRitualRecipeProvider extends RecipeProvider {
         // Player Revival (Tier 4)
         createRevivalRecipe(
                 output,
-                "player_revival", 4,
-                WTItems.SOUL_SYRINGE.get(), 1000,
+                "player_revival",
+                4,
+                WTItems.SOUL_SYRINGE.get(),
+                1000,
                 List.of(
                         Ingredient.of(Items.TOTEM_OF_UNDYING),
                         Ingredient.of(Items.NETHER_STAR),
@@ -65,15 +65,16 @@ public class WTRitualRecipeProvider extends RecipeProvider {
                         Ingredient.of(Items.DIAMOND_BLOCK)));
     }
 
-    private void createRitualRecipe(
+    private static void createRitualRecipe(
             RecipeOutput output,
             String name,
             int minTier,
-            net.minecraft.world.item.Item altarItem,
+            Item altarItem,
             int fluidAmount,
             List<Ingredient> pedestalItems,
             ItemStack result,
             String effect) {
+
         RitualRecipe recipe = new RitualRecipe(
                 minTier,
                 Ingredient.of(altarItem),
@@ -83,18 +84,21 @@ public class WTRitualRecipeProvider extends RecipeProvider {
                 effect);
 
         output.accept(
-                ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID, name),
+                ResourceLocation.fromNamespaceAndPath(
+                        WitchcraftTheDarkArts.MODID,
+                        name),
                 recipe,
                 null);
     }
 
-    private void createRevivalRecipe(
+    private static void createRevivalRecipe(
             RecipeOutput output,
             String name,
             int minTier,
-            net.minecraft.world.item.Item altarItem,
+            Item altarItem,
             int fluidAmount,
             List<Ingredient> pedestalItems) {
+
         RevivalRitualRecipe recipe = new RevivalRitualRecipe(
                 minTier,
                 Ingredient.of(altarItem),
@@ -102,8 +106,13 @@ public class WTRitualRecipeProvider extends RecipeProvider {
                 pedestalItems);
 
         output.accept(
-                ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID, name),
+                ResourceLocation.fromNamespaceAndPath(
+                        WitchcraftTheDarkArts.MODID,
+                        name),
                 recipe,
                 null);
+    }
+
+    private WTRitualRecipeProvider() {
     }
 }

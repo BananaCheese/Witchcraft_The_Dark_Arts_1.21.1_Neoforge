@@ -21,8 +21,6 @@ public final class WTDataGenerators {
         generator.addProvider(event.includeServer(), new WTRecipeProvider(output, lookupProvider));
 
         generator.addProvider(event.includeClient(), new WTItemModelProvider(output, existingFileHelper));
-
-        generator.addProvider(event.includeServer(), new WTRitualRecipeProvider(output, lookupProvider));
     }
 
     private WTDataGenerators() {
