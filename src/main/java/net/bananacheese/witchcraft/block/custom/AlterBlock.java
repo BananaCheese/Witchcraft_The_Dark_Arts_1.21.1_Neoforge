@@ -5,7 +5,6 @@ import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
 import net.bananacheese.witchcraft.ritual.RitualHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -23,11 +22,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class AlterBlock extends Block implements EntityBlock {
-    private static final VoxelShape SHAPE =
-            Block.box(2, 0, 2, 14, 13, 14);
-
-    public static final MapCodec<AlterBlock> CODEC =
-            simpleCodec(AlterBlock::new);
+    private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 13, 14);
+    public static final MapCodec<AlterBlock> CODEC = simpleCodec(AlterBlock::new);
 
     public AlterBlock(Properties properties) {
         super(properties);
@@ -39,11 +35,7 @@ public class AlterBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public VoxelShape getShape(
-            BlockState state,
-            BlockGetter level,
-            BlockPos pos,
-            CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
@@ -59,88 +51,64 @@ public class AlterBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Player player,
-            BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
 
-        if (!(level.getBlockEntity(pos) instanceof AlterBlockEntity altar)) {
+        if (!(level.getBlockEntity(pos) instanceof AlterBlockEntity alter)) {
             return InteractionResult.PASS;
         }
 
         ItemStack heldItem = player.getMainHandItem();
 
-        if (heldItem.is(Items.WATER_BUCKET)) {
-            if (altar.addFluid(1000)) {
+        if (heldItem.getItem() == Items.WATER_BUCKET) {
+            if (alter.addFluid(1000)) {
                 if (!player.getAbilities().instabuild) {
-                    player.setItemInHand(
-                            InteractionHand.MAIN_HAND,
-                            new ItemStack(Items.BUCKET));
+                    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
                 }
-
-                player.displayClientMessage(
-                        Component.literal("Altar filled with water"), true);
+                player.displayClientMessage(Component.literal("Altar filled with water"), true);
             } else {
-                player.displayClientMessage(
-                        Component.literal("Altar is already full"), true);
+                player.displayClientMessage(Component.literal("Altar is already full"), true);
             }
-
             return InteractionResult.SUCCESS;
         }
 
-        if (altar.getHeldItem().isEmpty()) {
+        if (alter.getHeldItem().isEmpty()) {
             if (!heldItem.isEmpty()) {
-                altar.setHeldItem(heldItem.copyWithCount(1));
-
+                ItemStack toPlace = heldItem.copyWithCount(1);
+                alter.setHeldItem(toPlace);
                 if (!player.getAbilities().instabuild) {
                     heldItem.shrink(1);
                 }
             }
         } else {
-            ItemStack existingItem = altar.getHeldItem();
-            altar.setHeldItem(ItemStack.EMPTY);
-
-            if (!player.getInventory().add(existingItem)) {
-                player.drop(existingItem, false);
+            ItemStack existing = alter.getHeldItem();
+            alter.setHeldItem(ItemStack.EMPTY);
+            if (!player.getInventory().add(existing)) {
+                player.drop(existing, false);
             }
         }
+
+        // setChanged() (called inside setHeldItem) only marks this dirty
+        // for disk saving — it does NOT push the change to the client, so
+        // without this the client-side block entity (what the floating-item
+        // renderer actually reads from) never learns the held item changed.
+        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
 
         return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void neighborChanged(
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Block neighborBlock,
-            BlockPos neighborPos,
-            boolean movedByPiston) {
-        super.neighborChanged(
-                state,
-                level,
-                pos,
-                neighborBlock,
-                neighborPos,
-                movedByPiston);
-
-        if (level.isClientSide
-                || !(level.getBlockEntity(pos) instanceof AlterBlockEntity altar)) {
-            return;
-        }
-
-        boolean powered = level.hasNeighborSignal(pos);
-
-        if (powered && !altar.wasPowered()) {
-            altar.setPowered(true);
-            RitualHandler.attemptRitual(level, pos, altar);
-        } else if (!powered) {
-            altar.setPowered(false);
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
+                                   BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof AlterBlockEntity alter) {
+            boolean powered = level.hasNeighborSignal(pos);
+            if (powered) {
+                RitualHandler.attemptRitual(level, pos, alter);
+            }
         }
     }
 }

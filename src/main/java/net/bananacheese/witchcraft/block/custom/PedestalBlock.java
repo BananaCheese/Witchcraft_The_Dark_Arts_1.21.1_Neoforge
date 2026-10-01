@@ -77,6 +77,10 @@ public class PedestalBlock extends Block implements EntityBlock {
             }
         }
 
+        // Same fix as AlterBlock — setChanged() alone doesn't sync to the
+        // client, which is what the floating-item renderer reads from.
+        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
+
         return InteractionResult.SUCCESS;
     }
 }

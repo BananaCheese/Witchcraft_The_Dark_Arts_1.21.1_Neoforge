@@ -17,9 +17,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class WTRitualRecipeProvider extends RecipeProvider {
-    public WTRitualRecipeProvider(
-            PackOutput output,
-            CompletableFuture<HolderLookup.Provider> registries) {
+    public WTRitualRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries);
     }
 
@@ -28,10 +26,8 @@ public class WTRitualRecipeProvider extends RecipeProvider {
         // Altar Analyzer Creation (Tier 1)
         createRitualRecipe(
                 output,
-                "altar_analyzer_creation",
-                1,
-                Items.GOLD_INGOT,
-                1000,
+                "altar_analyzer_creation", 1,
+                Items.GOLD_INGOT, 1000,
                 List.of(),
                 new ItemStack(WTItems.ALTER_ANALYZER.get()),
                 "portal");
@@ -39,10 +35,8 @@ public class WTRitualRecipeProvider extends RecipeProvider {
         // Dark Crystal Creation (Tier 4)
         createRitualRecipe(
                 output,
-                "dark_crystal_creation",
-                4,
-                Items.CRYING_OBSIDIAN,
-                0,
+                "dark_crystal_creation", 4,
+                Items.CRYING_OBSIDIAN, 0,
                 List.of(
                         Ingredient.of(Items.REDSTONE_BLOCK),
                         Ingredient.of(Items.REDSTONE_BLOCK),
@@ -58,10 +52,8 @@ public class WTRitualRecipeProvider extends RecipeProvider {
         // Player Revival (Tier 4)
         createRevivalRecipe(
                 output,
-                "player_revival",
-                4,
-                WTItems.SOUL_SYRINGE.get(),
-                1000,
+                "player_revival", 4,
+                WTItems.SOUL_SYRINGE.get(), 1000,
                 List.of(
                         Ingredient.of(Items.TOTEM_OF_UNDYING),
                         Ingredient.of(Items.NETHER_STAR),
