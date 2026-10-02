@@ -23,23 +23,46 @@ public class PedestalBlockEntityRenderer implements BlockEntityRenderer<Pedestal
     }
 
     @Override
-    public void render(PedestalBlockEntity pedestalBlockEntity, float partialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int i1) {
+    public void render(
+            PedestalBlockEntity pedestalBlockEntity,
+            float partialTick,
+            PoseStack poseStack,
+            MultiBufferSource multiBufferSource,
+            int packedLight,
+            int packedOverlay) {
+
         ItemStack stack = pedestalBlockEntity.getHeldItem();
+
         if (stack.isEmpty()) {
             return;
         }
 
-        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         Level level = pedestalBlockEntity.getLevel();
-        float rotation = (level.getGameTime() + partialTick) * ROTATION_SPEED;
+
+        if (level == null) {
+            return;
+        }
+
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+
+        float rotation =
+                (level.getGameTime() + partialTick) * ROTATION_SPEED;
 
         poseStack.pushPose();
-        poseStack.translate(0.5f, 1.0f, 0.5f);
-        poseStack.scale(0.4f, 0.4f, 0.4f);
+
+        poseStack.translate(0.5F, 1.0F, 0.5F);
+        poseStack.scale(0.4F, 0.4F, 0.4F);
         poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
 
-        itemRenderer.renderStatic(stack, ItemDisplayContext.GUI, getLightLevel(level, pedestalBlockEntity.getBlockPos()),
-                OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, level, 1);
+        itemRenderer.renderStatic(
+                stack,
+                ItemDisplayContext.GUI,
+                getLightLevel(level, pedestalBlockEntity.getBlockPos()),
+                OverlayTexture.NO_OVERLAY,
+                poseStack,
+                multiBufferSource,
+                level,
+                1);
 
         poseStack.popPose();
     }
@@ -47,6 +70,7 @@ public class PedestalBlockEntityRenderer implements BlockEntityRenderer<Pedestal
     private int getLightLevel(Level level, BlockPos pos) {
         int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
         int skyLight = level.getBrightness(LightLayer.SKY, pos);
+
         return LightTexture.pack(blockLight, skyLight);
     }
 }

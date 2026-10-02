@@ -1,6 +1,7 @@
 package net.bananacheese.witchcraft.block.entity.custom;
 
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
+import net.bananacheese.witchcraft.network.PedestalSyncPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -8,13 +9,12 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 public class PedestalBlockEntity extends BlockEntity {
@@ -26,13 +26,33 @@ public class PedestalBlockEntity extends BlockEntity {
     }
 
     public ItemStack getHeldItem() {
+        if (level != null && level.isClientSide) {
+            System.out.println(
+                    "[WCTDA] CLIENT pedestal " +
+                            worldPosition +
+                            " heldItem = " +
+                            heldItem);
+        }
+
         return heldItem;
     }
 
     public void setHeldItem(ItemStack stack) {
         this.heldItem = stack;
         setChanged();
-        syncToClient();
+
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersTrackingChunk(
+                    serverLevel,
+                    new net.minecraft.world.level.ChunkPos(worldPosition),
+                    new PedestalSyncPayload(
+                            worldPosition,
+                            heldItem.copy()));
+        }
+    }
+
+    public void setHeldItemClient(ItemStack stack) {
+        this.heldItem = stack;
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -45,30 +65,8 @@ public class PedestalBlockEntity extends BlockEntity {
 
             if (creationTicks == 0) {
                 setChanged();
-                syncToClient();
             }
         }
-    }
-
-    private void syncToClient() {
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
-
-        level.sendBlockUpdated(
-                worldPosition,
-                getBlockState(),
-                getBlockState(),
-                Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
-
-        ClientboundBlockEntityDataPacket packet =
-                ClientboundBlockEntityDataPacket.create(this);
-
-        ChunkPos chunkPos = new ChunkPos(worldPosition);
-
-        serverLevel.getChunkSource().chunkMap
-                .getPlayers(chunkPos, false)
-                .forEach(player -> player.connection.send(packet));
     }
 
     @Override
@@ -80,11 +78,11 @@ public class PedestalBlockEntity extends BlockEntity {
         super.onDataPacket(connection, packet, registries);
 
         if (level != null && level.isClientSide) {
-            level.sendBlockUpdated(
-                    worldPosition,
-                    getBlockState(),
-                    getBlockState(),
-                    Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
+            System.out.println(
+                    "[WCTDA] STANDARD pedestal packet received at " +
+                            worldPosition +
+                            " -> heldItem = " +
+                            heldItem);
         }
     }
 
