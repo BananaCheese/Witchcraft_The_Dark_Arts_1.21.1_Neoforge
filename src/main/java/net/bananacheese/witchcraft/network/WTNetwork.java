@@ -36,12 +36,6 @@ public final class WTNetwork {
             if (Minecraft.getInstance().level.getBlockEntity(payload.pos())
                     instanceof PedestalBlockEntity pedestal) {
 
-                System.out.println(
-                        "[WCTDA] CUSTOM pedestal sync received at " +
-                                payload.pos() +
-                                " -> " +
-                                payload.stack());
-
                 pedestal.setHeldItemClient(payload.stack());
             }
         });
