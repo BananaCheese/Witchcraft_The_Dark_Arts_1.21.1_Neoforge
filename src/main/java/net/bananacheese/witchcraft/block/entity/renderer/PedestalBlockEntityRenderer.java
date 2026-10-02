@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
 public class PedestalBlockEntityRenderer implements BlockEntityRenderer<PedestalBlockEntity> {
-    public static final float ROTATION_SPEED = 1.0F;
+    private static final float ROTATION_SPEED = 1.0F;
 
     public PedestalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
