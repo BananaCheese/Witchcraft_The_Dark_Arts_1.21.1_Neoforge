@@ -5,6 +5,7 @@ import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
 import net.bananacheese.witchcraft.ritual.RitualHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import org.jetbrains.annotations.Nullable;
 
 public class AlterBlock extends Block implements EntityBlock {
@@ -51,8 +53,13 @@ public class AlterBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-                                               Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            BlockHitResult hit) {
+
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -61,24 +68,20 @@ public class AlterBlock extends Block implements EntityBlock {
             return InteractionResult.PASS;
         }
 
-        ItemStack heldItem = player.getMainHandItem();
-
-        if (heldItem.getItem() == Items.WATER_BUCKET) {
-            if (alter.addFluid(1000)) {
-                if (!player.getAbilities().instabuild) {
-                    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
-                }
-                player.displayClientMessage(Component.literal("Altar filled with water"), true);
-            } else {
-                player.displayClientMessage(Component.literal("Altar is already full"), true);
-            }
+        if (FluidUtil.interactWithFluidHandler(
+                player,
+                InteractionHand.MAIN_HAND,
+                alter.getFluidHandler())) {
             return InteractionResult.SUCCESS;
         }
+
+        ItemStack heldItem = player.getMainHandItem();
 
         if (alter.getHeldItem().isEmpty()) {
             if (!heldItem.isEmpty()) {
                 ItemStack toPlace = heldItem.copyWithCount(1);
                 alter.setHeldItem(toPlace);
+
                 if (!player.getAbilities().instabuild) {
                     heldItem.shrink(1);
                 }
@@ -86,29 +89,34 @@ public class AlterBlock extends Block implements EntityBlock {
         } else {
             ItemStack existing = alter.getHeldItem();
             alter.setHeldItem(ItemStack.EMPTY);
+
             if (!player.getInventory().add(existing)) {
                 player.drop(existing, false);
             }
         }
 
-        // setChanged() (called inside setHeldItem) only marks this dirty
-        // for disk saving — it does NOT push the change to the client, so
-        // without this the client-side block entity (what the floating-item
-        // renderer actually reads from) never learns the held item changed.
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
-
         return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
-                                   BlockPos neighborPos, boolean movedByPiston) {
+    protected void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof AlterBlockEntity alter) {
+
+        if (!level.isClientSide
+                && level.getBlockEntity(pos) instanceof AlterBlockEntity alter) {
             boolean powered = level.hasNeighborSignal(pos);
+
             if (powered) {
                 RitualHandler.attemptRitual(level, pos, alter);
             }
         }
     }
 }
+

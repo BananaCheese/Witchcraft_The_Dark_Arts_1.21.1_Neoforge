@@ -26,6 +26,10 @@ public final class WTBlocks {
             "pedestal", net.bananacheese.witchcraft.block.custom.PedestalBlock::new,
             BlockBehaviour.Properties.of().noOcclusion().strength(2, 6));
 
+    //public static final DeferredBlock<net.bananacheese.witchcraft.block.custom.DarkCauldronBlock> DARK_CAULDRON = BLOCKS.registerBlock(
+    //        "alter", net.bananacheese.witchcraft.block.custom.DarkCauldronBlock::new,
+    //        BlockBehaviour.Properties.of().noOcclusion().strength(2, 6));
+
     public static final DeferredBlock<DarkBarrierBlock> DARK_BARRIER = BLOCKS.registerBlock(
             "dark_barrier", DarkBarrierBlock::new,
             BlockBehaviour.Properties.of().strength(3, 9));
@@ -41,6 +45,7 @@ public final class WTBlocks {
 
     public static final DeferredHolder<Item, BlockItem> ALTER_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(ALTER);
     public static final DeferredHolder<Item, BlockItem> PEDESTAL_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(PEDESTAL);
+    //public static final DeferredHolder<Item, BlockItem> DARK_CAULDRON_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(DARK_CAULDRON);
     public static final DeferredHolder<Item, BlockItem> DARK_BARRIER_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(DARK_BARRIER);
     public static final DeferredHolder<Item, BlockItem> CLOUD_BLOCK_ITEM = BLOCK_ITEMS.registerSimpleBlockItem(CLOUD_BLOCK);
 

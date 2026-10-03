@@ -1,6 +1,7 @@
 package net.bananacheese.witchcraft.block.entity.custom;
 
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
+import net.bananacheese.witchcraft.network.AlterFluidSyncPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,15 +12,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 public class AlterBlockEntity extends BlockEntity {
-    private static final int MAX_FLUID = 1000;
+    public static final int MAX_FLUID = 1000;
 
     private ItemStack heldItem = ItemStack.EMPTY;
-    private int fluidAmount = 0;
+    private FluidStack fluid = FluidStack.EMPTY;
     private int creationTicks = 0;
     private boolean powered = false;
+
+    private final IFluidHandler fluidHandler = new AlterFluidHandler();
 
     public AlterBlockEntity(BlockPos pos, BlockState state) {
         super(WTBlockEntities.ALTER_BE.get(), pos, state);
@@ -35,30 +41,30 @@ public class AlterBlockEntity extends BlockEntity {
         syncToClient();
     }
 
+    public FluidStack getFluid() {
+        return fluid;
+    }
+
     public int getFluidAmount() {
-        return fluidAmount;
+        return fluid.getAmount();
     }
 
     public boolean addFluid(int amount) {
-        if (fluidAmount >= MAX_FLUID) {
+        if (amount <= 0) {
             return false;
         }
 
-        fluidAmount = Math.min(MAX_FLUID, fluidAmount + amount);
-        setChanged();
-        syncToClient();
-        return true;
+        return fillFluid(
+                new FluidStack(net.minecraft.world.level.material.Fluids.WATER, amount),
+                IFluidHandler.FluidAction.EXECUTE) > 0;
     }
 
     public boolean consumeFluid(int amount) {
-        if (fluidAmount < amount) {
+        if (amount <= 0) {
             return false;
         }
 
-        fluidAmount -= amount;
-        setChanged();
-        syncToClient();
-        return true;
+        return drainFluid(amount, IFluidHandler.FluidAction.EXECUTE).getAmount() == amount;
     }
 
     public boolean wasPowered() {
@@ -67,6 +73,10 @@ public class AlterBlockEntity extends BlockEntity {
 
     public void setPowered(boolean powered) {
         this.powered = powered;
+    }
+
+    public IFluidHandler getFluidHandler() {
+        return fluidHandler;
     }
 
     public void tick(Level level, BlockPos pos, BlockState state) {
@@ -94,31 +104,101 @@ public class AlterBlockEntity extends BlockEntity {
         return creationTicks > 0;
     }
 
+    private int fillFluid(FluidStack resource, IFluidHandler.FluidAction action) {
+        if (resource.isEmpty()) {
+            return 0;
+        }
+
+        if (!fluid.isEmpty()
+                && !FluidStack.isSameFluidSameComponents(fluid, resource)) {
+            return 0;
+        }
+
+        int amount = Math.min(resource.getAmount(), MAX_FLUID - fluid.getAmount());
+
+        if (amount <= 0) {
+            return 0;
+        }
+
+        if (action.simulate()) {
+            return amount;
+        }
+
+        if (fluid.isEmpty()) {
+            fluid = resource.copyWithAmount(amount);
+        } else {
+            fluid.grow(amount);
+        }
+
+        setChanged();
+        syncToClient();
+        return amount;
+    }
+
+    private FluidStack drainFluid(int amount, IFluidHandler.FluidAction action) {
+        if (amount <= 0 || fluid.isEmpty()) {
+            return FluidStack.EMPTY;
+        }
+
+        int drainedAmount = Math.min(amount, fluid.getAmount());
+        FluidStack drained = fluid.copyWithAmount(drainedAmount);
+
+        if (action.simulate()) {
+            return drained;
+        }
+
+        fluid.shrink(drainedAmount);
+        if (fluid.isEmpty()) {
+            fluid = FluidStack.EMPTY;
+        }
+
+        setChanged();
+        syncToClient();
+        return drained;
+    }
+
+    private FluidStack drainFluid(FluidStack resource, IFluidHandler.FluidAction action) {
+        if (resource.isEmpty()
+                || fluid.isEmpty()
+                || !FluidStack.isSameFluidSameComponents(fluid, resource)) {
+            return FluidStack.EMPTY;
+        }
+
+        return drainFluid(resource.getAmount(), action);
+    }
+
     private void syncToClient() {
-        if (level == null || level.isClientSide) {
+        if (!(level instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
             return;
         }
 
-        level.sendBlockUpdated(
-                worldPosition,
-                getBlockState(),
-                getBlockState(),
-                3);
+        PacketDistributor.sendToPlayersTrackingChunk(
+                serverLevel,
+                new net.minecraft.world.level.ChunkPos(worldPosition),
+                new AlterFluidSyncPayload(worldPosition, fluid.copy()));
+    }
+
+    public void setFluidClient(FluidStack stack) {
+        fluid = stack.copy();
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
 
-        fluidAmount = tag.getInt("FluidAmount");
         creationTicks = tag.getInt("CreationTicks");
         powered = tag.getBoolean("Powered");
 
         if (tag.contains("HeldItem")) {
             heldItem = ItemStack.parseOptional(registries, tag.getCompound("HeldItem"));
-
         } else {
             heldItem = ItemStack.EMPTY;
+        }
+
+        if (tag.contains("Fluid")) {
+            fluid = FluidStack.parseOptional(registries, tag.getCompound("Fluid"));
+        } else {
+            fluid = FluidStack.EMPTY;
         }
     }
 
@@ -126,12 +206,15 @@ public class AlterBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
 
-        tag.putInt("FluidAmount", fluidAmount);
         tag.putInt("CreationTicks", creationTicks);
         tag.putBoolean("Powered", powered);
 
         if (!heldItem.isEmpty()) {
             tag.put("HeldItem", heldItem.save(registries));
+        }
+
+        if (!fluid.isEmpty()) {
+            tag.put("Fluid", fluid.save(registries));
         }
     }
 
@@ -146,5 +229,42 @@ public class AlterBlockEntity extends BlockEntity {
         CompoundTag tag = new CompoundTag();
         saveAdditional(tag, registries);
         return tag;
+    }
+
+    private class AlterFluidHandler implements IFluidHandler {
+        @Override
+        public int getTanks() {
+            return 1;
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            return tank == 0 ? fluid.copy() : FluidStack.EMPTY;
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            return tank == 0 ? MAX_FLUID : 0;
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, FluidStack stack) {
+            return tank == 0 && !stack.isEmpty();
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            return fillFluid(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+            return drainFluid(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return drainFluid(maxDrain, action);
+        }
     }
 }
