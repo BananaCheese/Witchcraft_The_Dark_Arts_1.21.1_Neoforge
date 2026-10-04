@@ -32,11 +32,12 @@ public class WTLootTableProvider {
             dropSelf(WTBlocks.PEDESTAL.get());
             dropSelf(WTBlocks.DARK_BARRIER.get());
             dropSelf(WTBlocks.CLOUD_BLOCK.get());
+            dropSelf(WTBlocks.DARK_CAULDRON.get());
         }
 
         @Override
         protected Iterable<Block> getKnownBlocks() {
-            return List.of(WTBlocks.ALTER.get(), WTBlocks.PEDESTAL.get(), WTBlocks.DARK_BARRIER.get(), WTBlocks.CLOUD_BLOCK.get());
+            return List.of(WTBlocks.ALTER.get(), WTBlocks.PEDESTAL.get(), WTBlocks.DARK_BARRIER.get(), WTBlocks.CLOUD_BLOCK.get(), WTBlocks.DARK_CAULDRON.get());
         }
     }
 }

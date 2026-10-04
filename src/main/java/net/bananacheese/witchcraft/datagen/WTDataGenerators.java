@@ -1,5 +1,6 @@
 package net.bananacheese.witchcraft.datagen;
 
+import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -21,6 +22,8 @@ public final class WTDataGenerators {
         generator.addProvider(event.includeServer(), new WTRecipeProvider(output, lookupProvider));
 
         generator.addProvider(event.includeClient(), new WTItemModelProvider(output, existingFileHelper));
+
+        generator.addProvider(event.includeServer(), new WTEssenceProvider(output, WitchcraftTheDarkArts.MODID, lookupProvider));
     }
 
     private WTDataGenerators() {

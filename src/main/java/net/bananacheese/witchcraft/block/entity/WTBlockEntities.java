@@ -3,6 +3,7 @@ package net.bananacheese.witchcraft.block.entity;
 import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.block.WTBlocks;
 import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
+import net.bananacheese.witchcraft.block.entity.custom.DarkCauldronBlockEntity;
 import net.bananacheese.witchcraft.block.entity.custom.PedestalBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,6 +21,10 @@ public final class WTBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PedestalBlockEntity>> PEDESTAL_BE =
             BLOCK_ENTITY_TYPES.register("pedestal_be",
                     () -> BlockEntityType.Builder.of(PedestalBlockEntity::new, WTBlocks.PEDESTAL.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DarkCauldronBlockEntity>> DARK_CAULDRON_BE =
+            BLOCK_ENTITY_TYPES.register("dark_cauldron_be",
+                    () -> BlockEntityType.Builder.of(DarkCauldronBlockEntity::new, WTBlocks.DARK_CAULDRON.get()).build(null));
 
     private WTBlockEntities() {
     }

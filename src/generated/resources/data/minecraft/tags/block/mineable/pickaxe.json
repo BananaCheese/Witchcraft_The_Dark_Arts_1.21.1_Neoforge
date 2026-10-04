@@ -1,6 +1,8 @@
 {
   "values": [
     "wctda:alter",
-    "wctda:pedestal"
+    "wctda:pedestal",
+    "wctda:dark_barrier",
+    "wctda:cauldron"
   ]
 }

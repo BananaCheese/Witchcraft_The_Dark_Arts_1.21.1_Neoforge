@@ -9,9 +9,12 @@ import net.bananacheese.witchcraft.event.WTCloudEvents;
 import net.bananacheese.witchcraft.init.WTMenuTypes;
 import net.bananacheese.witchcraft.item.WTItemGroup;
 import net.bananacheese.witchcraft.item.WTItems;
+import net.bananacheese.witchcraft.potion.synthesis.EssenceDataLoader;
 import net.bananacheese.witchcraft.recipe.WTRecipes;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -55,5 +58,10 @@ public class WitchcraftTheDarkArts {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             WitchcraftTheDarkArtsClient.init(modEventBus);
         }
+    }
+
+    @SubscribeEvent
+    public static void onAddReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new EssenceDataLoader());
     }
 }

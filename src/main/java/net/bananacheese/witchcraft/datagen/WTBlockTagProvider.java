@@ -21,6 +21,8 @@ public class WTBlockTagProvider extends BlockTagsProvider {
     protected void addTags(HolderLookup.Provider provider) {
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(WTBlocks.ALTER.get())
-                .add(WTBlocks.PEDESTAL.get());
+                .add(WTBlocks.PEDESTAL.get())
+                .add(WTBlocks.DARK_BARRIER.get())
+                .add(WTBlocks.DARK_CAULDRON.get());
     }
 }

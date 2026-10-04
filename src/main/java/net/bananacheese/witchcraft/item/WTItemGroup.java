@@ -28,6 +28,8 @@ public class WTItemGroup {
                 pOutput.accept(WTBlocks.PEDESTAL);
                 pOutput.accept(WTBlocks.DARK_BARRIER);
                 pOutput.accept(WTBlocks.CLOUD_BLOCK);
+
+                pOutput.accept(WTBlocks.DARK_CAULDRON);
             }).build());
 
     public static void register(IEventBus eventBus) {

@@ -1,7 +1,9 @@
 package net.bananacheese.witchcraft;
 
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
+import net.bananacheese.witchcraft.block.entity.custom.DarkCauldronBlockEntity;
 import net.bananacheese.witchcraft.block.entity.renderer.AlterBlockEntityRenderer;
+import net.bananacheese.witchcraft.block.entity.renderer.DarkCauldronBlockEntityRenderer;
 import net.bananacheese.witchcraft.block.entity.renderer.PedestalBlockEntityRenderer;
 import net.bananacheese.witchcraft.client.BarrierParticleRenderer;
 import net.bananacheese.witchcraft.init.WTMenuTypes;
@@ -55,5 +57,6 @@ public class WitchcraftTheDarkArtsClient {
     static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(WTBlockEntities.ALTER_BE.get(), AlterBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(WTBlockEntities.PEDESTAL_BE.get(), PedestalBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(WTBlockEntities.DARK_CAULDRON_BE.get(), DarkCauldronBlockEntityRenderer::new);
     }
 }

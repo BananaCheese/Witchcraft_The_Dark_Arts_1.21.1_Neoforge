@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
-import net.bananacheese.witchcraft.block.entity.custom.PedestalBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LightTexture;
@@ -204,28 +203,15 @@ public class AlterBlockEntityRenderer implements BlockEntityRenderer<AlterBlockE
     }
 
     private static void drawQuad(
-            VertexConsumer consumer,
-            PoseStack poseStack,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            float u0,
-            float v0,
-            float u1,
-            float v1,
-            int packedLight,
-            int color) {
+            VertexConsumer consumer, PoseStack poseStack,
+            float minX, float y, float minZ,
+            float maxX, float maxZ,
+            float u0, float v0, float u1, float v1,
+            float spriteV1, int packedLight, int color) {
 
-        drawVertex(consumer, poseStack, x0, y0, z0,
-                u0, v0, packedLight, color);
-        drawVertex(consumer, poseStack, x0, y1, z1,
-                u0, v1, packedLight, color);
-        drawVertex(consumer, poseStack, x1, y1, z1,
-                u1, v1, packedLight, color);
-        drawVertex(consumer, poseStack, x1, y0, z0,
-                u1, v0, packedLight, color);
+        drawVertex(consumer, poseStack, minX, y, minZ, u0, v0, packedLight, color);
+        drawVertex(consumer, poseStack, minX, y, maxZ, u0, v1, packedLight, color);
+        drawVertex(consumer, poseStack, maxX, y, maxZ, u1, v1, packedLight, color);
+        drawVertex(consumer, poseStack, maxX, y, minZ, u1, v0, packedLight, color);
     }
 }

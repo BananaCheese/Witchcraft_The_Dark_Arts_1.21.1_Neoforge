@@ -1,8 +1,8 @@
 package net.bananacheese.witchcraft.network;
 
-import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
 import net.bananacheese.witchcraft.block.entity.custom.AlterBlockEntity;
+import net.bananacheese.witchcraft.block.entity.custom.DarkCauldronBlockEntity;
 import net.bananacheese.witchcraft.block.entity.custom.PedestalBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -64,5 +64,21 @@ public final class WTNetwork {
                 alter.setFluidClient(payload.fluid());
             }
         });
+    }
+
+    public static void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar("1.0.0");
+
+        registrar.playToClient(
+                DarkCauldronFluidSyncPayload.TYPE,
+                DarkCauldronFluidSyncPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (Minecraft.getInstance().level != null &&
+                            Minecraft.getInstance().level.getBlockEntity(payload.pos()) instanceof DarkCauldronBlockEntity cauldron) {
+
+                        cauldron.setClientData(payload.isFilled(), payload.isBoiling(), payload.ingredients());
+                    }
+                })
+        );
     }
 }
