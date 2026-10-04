@@ -16,5 +16,6 @@ public class WTItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         handheldItem(WTItems.ALTER_ANALYZER.get());
         basicItem(WTItems.DARK_CRYSTAL.get());
+        basicItem(WTItems.POTION_POUCH.get());
     }
 }

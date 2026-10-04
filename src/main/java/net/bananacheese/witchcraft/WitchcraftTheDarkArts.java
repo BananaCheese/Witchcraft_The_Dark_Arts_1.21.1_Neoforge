@@ -6,6 +6,7 @@ import net.bananacheese.witchcraft.component.WTComponents;
 import net.bananacheese.witchcraft.datagen.WTDataGenerators;
 import net.bananacheese.witchcraft.event.PlayerDeathHandler;
 import net.bananacheese.witchcraft.event.WTCloudEvents;
+import net.bananacheese.witchcraft.init.WTMenuTypes;
 import net.bananacheese.witchcraft.item.WTItemGroup;
 import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.recipe.WTRecipes;
@@ -46,6 +47,8 @@ public class WitchcraftTheDarkArts {
         NeoForge.EVENT_BUS.addListener(WTCloudEvents::onLivingJump);
 
         NeoForge.EVENT_BUS.addListener(PlayerDeathHandler::onPlayerDeath);
+
+        WTMenuTypes.MENU_TYPES.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 

@@ -22,6 +22,8 @@ public class WTItemGroup {
                 pOutput.accept(WTItems.SOUL_SYRINGE);
                 pOutput.accept(WTItems.ALTER_ANALYZER);
 
+                pOutput.accept(WTItems.POTION_POUCH);
+
                 pOutput.accept(WTBlocks.ALTER);
                 pOutput.accept(WTBlocks.PEDESTAL);
                 pOutput.accept(WTBlocks.DARK_BARRIER);
