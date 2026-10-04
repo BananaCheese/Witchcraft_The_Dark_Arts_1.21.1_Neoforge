@@ -11,10 +11,7 @@ import net.minecraft.world.item.ItemStack;
 public record PedestalSyncPayload(BlockPos pos, ItemStack stack) implements CustomPacketPayload {
 
     public static final Type<PedestalSyncPayload> TYPE =
-            new Type<>(
-                    ResourceLocation.fromNamespaceAndPath(
-                            WitchcraftTheDarkArts.MODID,
-                            "pedestal_sync"));
+            new Type<>(ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID, "pedestal_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, PedestalSyncPayload> STREAM_CODEC =
             StreamCodec.composite(

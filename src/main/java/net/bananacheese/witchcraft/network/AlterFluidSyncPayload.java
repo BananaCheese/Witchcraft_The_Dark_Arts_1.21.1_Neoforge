@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public record AlterFluidSyncPayload(BlockPos pos, FluidStack fluid) implements CustomPacketPayload {
+
     public static final Type<AlterFluidSyncPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID, "alter_fluid_sync"));
 

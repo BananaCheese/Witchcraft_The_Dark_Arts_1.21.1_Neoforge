@@ -35,6 +35,10 @@ public class AlterBlockEntity extends BlockEntity {
         return heldItem;
     }
 
+    public void setHeldItemClient(ItemStack stack) {
+        this.heldItem = stack;
+    }
+
     public void setHeldItem(ItemStack stack) {
         this.heldItem = stack;
         setChanged();
