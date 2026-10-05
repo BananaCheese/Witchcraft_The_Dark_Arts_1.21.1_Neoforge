@@ -7,6 +7,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.core.component.DataComponentType;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -38,6 +39,16 @@ public final class WTComponents {
                     .persistent(ProceduralPotionData.CODEC)
                     .networkSynchronized(ProceduralPotionData.STREAM_CODEC)
                     .build());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> ANALYZED =
+            COMPONENTS.register("analyzed",
+                    () -> DataComponentType.<Boolean>builder()
+                            .persistent(Codec.BOOL)
+                            .build());
+
+    public static void register(IEventBus eventBus) {
+        COMPONENTS.register(eventBus);
+    }
 
     private WTComponents() {}
 }

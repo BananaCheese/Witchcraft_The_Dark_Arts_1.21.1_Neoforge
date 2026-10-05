@@ -30,6 +30,11 @@ public final class WTNetwork {
                 AlterFluidSyncPayload.TYPE,
                 AlterFluidSyncPayload.STREAM_CODEC,
                 WTNetwork::handleAlterFluidSync);
+
+        registrar.playToClient(
+                DarkCauldronFluidSyncPayload.TYPE,
+                DarkCauldronFluidSyncPayload.STREAM_CODEC,
+                WTNetwork::handleDarkCauldronFluidSync);
     }
 
     @SubscribeEvent
@@ -66,19 +71,16 @@ public final class WTNetwork {
         });
     }
 
-    public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("1.0.0");
+    private static void handleDarkCauldronFluidSync(
+            DarkCauldronFluidSyncPayload payload,
+            net.neoforged.neoforge.network.handling.IPayloadContext context) {
 
-        registrar.playToClient(
-                DarkCauldronFluidSyncPayload.TYPE,
-                DarkCauldronFluidSyncPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() -> {
-                    if (Minecraft.getInstance().level != null &&
-                            Minecraft.getInstance().level.getBlockEntity(payload.pos()) instanceof DarkCauldronBlockEntity cauldron) {
-
-                        cauldron.setClientData(payload.isFilled(), payload.isBoiling(), payload.ingredients());
-                    }
-                })
-        );
+        context.enqueueWork(() -> {
+            if (context.player().level().isClientSide
+                    && context.player().level().getBlockEntity(payload.pos())
+                    instanceof DarkCauldronBlockEntity cauldron) {
+                cauldron.setClientData(payload.isFilled(), payload.isBoiling(), payload.ingredients());
+            }
+        });
     }
 }

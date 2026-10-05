@@ -48,8 +48,8 @@ public class WitchcraftTheDarkArts {
         modEventBus.addListener(WTDataGenerators::gatherData);
 
         NeoForge.EVENT_BUS.addListener(WTCloudEvents::onLivingJump);
-
         NeoForge.EVENT_BUS.addListener(PlayerDeathHandler::onPlayerDeath);
+        NeoForge.EVENT_BUS.addListener(WitchcraftTheDarkArts::onAddReloadListeners);
 
         WTMenuTypes.MENU_TYPES.register(modEventBus);
 
@@ -60,7 +60,6 @@ public class WitchcraftTheDarkArts {
         }
     }
 
-    @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new EssenceDataLoader());
     }

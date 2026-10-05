@@ -1,5 +1,7 @@
 package net.bananacheese.witchcraft.item.custom;
 
+import net.bananacheese.witchcraft.block.custom.AlterBlock;
+import net.bananacheese.witchcraft.component.WTComponents;
 import net.bananacheese.witchcraft.ritual.AlterTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -11,6 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -57,6 +60,24 @@ public class AlterAnalyzer extends Item {
     }
 
     private void analyze(Level level, Player player, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+
+        // 1. Verify the clicked block is actually an Altar component
+        if (!(state.getBlock() instanceof AlterBlock)) { // Replace 'AlterBlock' with your actual Altar block class
+            // Check offhand for item scanning if not clicking an Altar
+            ItemStack offhandStack = player.getOffhandItem();
+            if (!offhandStack.isEmpty()) {
+                offhandStack.set(WTComponents.ANALYZED.get(), true);
+                player.displayClientMessage(
+                        Component.literal("§aAnalyzed " + offhandStack.getHoverName().getString() + "! Essence contents revealed."),
+                        true
+                );
+            } else {
+                player.displayClientMessage(Component.literal("§cNot looking at an Altar!"), true);
+            }
+            return;
+        }
+
         AlterTier tier = AlterTier.getHighestValidTier(level, pos);
 
         player.displayClientMessage(
@@ -86,6 +107,21 @@ public class AlterAnalyzer extends Item {
                         + nextTier.getLevel() + "§7:"), false);
         player.displayClientMessage(
                 Component.literal("§7" + nextTier.getDisplayName()), false);
+    }
+
+    private void analyzeItemInOffhand(Player player) {
+        ItemStack offhandStack = player.getOffhandItem();
+        if (!offhandStack.isEmpty()) {
+            offhandStack.set(WTComponents.ANALYZED.get(), true);
+            player.displayClientMessage(
+                    Component.literal("§aAnalyzed " + offhandStack.getHoverName().getString() + "! Essence contents revealed."),
+                    true
+            );
+        }
+    }
+
+    public void markItemAsAnalyzed(ItemStack stack) {
+        stack.set(WTComponents.ANALYZED.get(), true);
     }
 }
 
