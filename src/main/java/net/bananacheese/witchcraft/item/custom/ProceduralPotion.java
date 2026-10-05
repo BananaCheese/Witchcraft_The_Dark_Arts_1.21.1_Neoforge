@@ -1,12 +1,22 @@
 package net.bananacheese.witchcraft.item.custom;
 
 import net.bananacheese.witchcraft.component.WTComponents;
+import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.potion.ProceduralEffect;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.List;
 
@@ -23,6 +33,61 @@ public class ProceduralPotion extends Item {
         }
         return super.getMaxStackSize(stack);
     }
+
+    // ---------------------------------------------------------------- drinking
+
+    @Override
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.DRINK;
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+        return 32;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        // Only start drinking if there is actually something to drink.
+        if (!player.getItemInHand(hand).has(WTComponents.PROCEDURAL_POTION.get())) {
+            return InteractionResultHolder.pass(player.getItemInHand(hand));
+        }
+        return ItemUtils.startUsingInstantly(level, player, hand);
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        Player player = entity instanceof Player p ? p : null;
+        if (player instanceof ServerPlayer serverPlayer) {
+            CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
+        }
+
+        ProceduralPotionData data = stack.get(WTComponents.PROCEDURAL_POTION.get());
+        if (!level.isClientSide && data != null) {
+            data.applyTo(entity, player, player, 1.0);
+        }
+
+        if (player != null) {
+            player.awardStat(Stats.ITEM_USED.get(this));
+        }
+
+        boolean infinite = player != null && player.getAbilities().instabuild;
+        if (!infinite) {
+            stack.shrink(1);
+            if (stack.isEmpty()) {
+                entity.gameEvent(GameEvent.DRINK);
+                return new ItemStack(Items.GLASS_BOTTLE);
+            }
+            if (player != null) {
+                player.getInventory().add(new ItemStack(Items.GLASS_BOTTLE));
+            }
+        }
+
+        entity.gameEvent(GameEvent.DRINK);
+        return stack;
+    }
+
+    // ---------------------------------------------------------------- tooltip
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {

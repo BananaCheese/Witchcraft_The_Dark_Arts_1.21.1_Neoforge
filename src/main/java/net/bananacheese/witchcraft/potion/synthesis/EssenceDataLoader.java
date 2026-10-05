@@ -13,6 +13,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +64,8 @@ public class EssenceDataLoader extends SimpleJsonResourceReloadListener {
      * Combines up to 5 ingredient items into a single unified essence map for synthesis.
      */
     public static Map<EssenceType, Float> combineIngredients(Iterable<ItemStack> ingredients) {
-        Map<EssenceType, Float> combinedMap = new HashMap<>();
+        // EnumMap: deterministic (ordinal) iteration order, required for seed-stable synthesis.
+        Map<EssenceType, Float> combinedMap = new EnumMap<>(EssenceType.class);
 
         int count = 0;
         for (ItemStack stack : ingredients) {
@@ -81,3 +83,4 @@ public class EssenceDataLoader extends SimpleJsonResourceReloadListener {
         return combinedMap;
     }
 }
+

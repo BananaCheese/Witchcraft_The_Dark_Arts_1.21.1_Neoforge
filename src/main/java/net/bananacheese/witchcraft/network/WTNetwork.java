@@ -79,7 +79,7 @@ public final class WTNetwork {
             if (context.player().level().isClientSide
                     && context.player().level().getBlockEntity(payload.pos())
                     instanceof DarkCauldronBlockEntity cauldron) {
-                cauldron.setClientData(payload.isFilled(), payload.isBoiling(), payload.ingredients());
+                cauldron.setClientData(payload.isFilled(), payload.isBoiling(), payload.ingredients(), payload.color());
             }
         });
     }

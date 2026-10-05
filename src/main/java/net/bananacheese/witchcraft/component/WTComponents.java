@@ -5,15 +5,12 @@ import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.core.component.DataComponentType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.UUID;
-
-import static net.minecraft.util.datafix.fixes.References.DATA_COMPONENTS;
 
 public final class WTComponents {
     public static final DeferredRegister.DataComponents COMPONENTS =

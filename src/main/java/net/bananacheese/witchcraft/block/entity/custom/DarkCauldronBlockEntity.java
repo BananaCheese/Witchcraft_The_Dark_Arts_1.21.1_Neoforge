@@ -2,9 +2,8 @@ package net.bananacheese.witchcraft.block.entity.custom;
 
 import net.bananacheese.witchcraft.block.custom.DarkCauldron;
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
-import net.bananacheese.witchcraft.component.WTComponents;
-import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.network.DarkCauldronFluidSyncPayload;
+import net.bananacheese.witchcraft.potion.PotionForm;
 import net.bananacheese.witchcraft.potion.PotionSize;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
 import net.bananacheese.witchcraft.potion.synthesis.EssenceData;
@@ -14,6 +13,8 @@ import net.bananacheese.witchcraft.potion.synthesis.SynthesisEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -37,20 +38,35 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class DarkCauldronBlockEntity extends BlockEntity {
 
     public boolean isFilled = false;
-    public boolean clientIsBoiling =  false;
+    public boolean clientIsBoiling = false;
     private int heatTicks = 0;
     private static final int BOIL_THRESHOLD = 100;
+    public static final int MAX_INGREDIENTS = 5;
+
     private final List<ItemStack> insertedIngredients = new ArrayList<>();
+
+    /**
+     * Blended liquid colour as 0xRRGGBB, computed on the SERVER and synced, because the essence
+     * registry only exists server-side (it is filled by a reload listener). 0 = "no potion colour,
+     * render plain water".
+     */
+    private int potionColor = 0;
+
+    /** Which item the next glass bottle will produce. Server-side only; reset when brewing finishes. */
+    private PotionForm form = PotionForm.DRINK;
 
     public DarkCauldronBlockEntity(BlockPos pos, BlockState state) {
         super(WTBlockEntities.DARK_CAULDRON_BE.get(), pos, state);
     }
+
+    // ------------------------------------------------------------------ ticking
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, DarkCauldronBlockEntity cauldron) {
         if (!cauldron.isFilled) return;
@@ -71,52 +87,36 @@ public class DarkCauldronBlockEntity extends BlockEntity {
             cauldron.syncToClient();
         }
 
-        // DEBUG: Print heat progression every 20 ticks (1 sec)
-        if (level.getGameTime() % 20 == 0) {
-            System.out.println("[Cauldron Debug] isFilled: " + cauldron.isFilled
-                    + " | heated: " + heated
-                    + " | heatTicks: " + cauldron.heatTicks
-                    + " | isBoiling: " + currentlyBoiling);
-        }
-
         // 2. Ingest ItemEntities floating inside or near the cauldron basin
-        if (currentlyBoiling) {
+        if (currentlyBoiling && cauldron.insertedIngredients.size() < MAX_INGREDIENTS) {
             AABB basinBox = new AABB(
                     pos.getX() + 0.0625D, pos.getY() + 0.125D, pos.getZ() + 0.0625D,
-                    pos.getX() + 0.9375D, pos.getY() + 1.25D,  pos.getZ() + 0.9375D
+                    pos.getX() + 0.9375D, pos.getY() + 1.25D, pos.getZ() + 0.9375D
             );
 
             List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, basinBox);
-            if (!items.isEmpty()) {
-                System.out.println("[Cauldron Debug] Found " + items.size() + " ItemEntity(s) inside basin box!");
-            }
-
             for (ItemEntity itemEntity : items) {
                 if (!itemEntity.isAlive()) continue;
 
                 ItemStack stack = itemEntity.getItem();
-                boolean valid = cauldron.isValidIngredient(stack);
-                System.out.println("[Cauldron Debug] Checking item: " + stack.getHoverName().getString() + " | isValidIngredient: " + valid);
+                if (!cauldron.isValidIngredient(stack)) continue;
 
-                if (valid) {
-                    ItemStack singleIngredient = stack.copyWithCount(1);
-                    cauldron.insertedIngredients.add(singleIngredient);
+                cauldron.insertedIngredients.add(stack.copyWithCount(1));
+                cauldron.recomputeColor();
 
-                    stack.shrink(1);
-                    if (stack.isEmpty()) {
-                        itemEntity.discard();
-                    }
-
-                    level.playSound(
-                            null, pos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS,
-                            0.5F, 1.2F + (level.random.nextFloat() * 0.4F)
-                    );
-
-                    cauldron.setChanged();
-                    cauldron.syncToClient();
-                    System.out.println("[Cauldron Debug] ABSORBED ITEM SUCCESSFULLY! Current ingredients count: " + cauldron.insertedIngredients.size());
-                    break;
+                stack.shrink(1);
+                if (stack.isEmpty()) {
+                    itemEntity.discard();
                 }
+
+                level.playSound(
+                        null, pos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS,
+                        0.5F, 1.2F + (level.random.nextFloat() * 0.4F)
+                );
+
+                cauldron.setChanged();
+                cauldron.syncToClient();
+                break; // one ingredient per tick
             }
         }
     }
@@ -127,6 +127,8 @@ public class DarkCauldronBlockEntity extends BlockEntity {
         }
         return this.isFilled && this.heatTicks >= BOIL_THRESHOLD;
     }
+
+    // ------------------------------------------------------------------ interaction
 
     public void onPlayerInteract(Player player, InteractionHand hand, ItemStack heldItem) {
         if (level == null || level.isClientSide()) return;
@@ -170,19 +172,37 @@ public class DarkCauldronBlockEntity extends BlockEntity {
             return;
         }
 
+        boolean brewing = this.isFilled && this.isBoiling() && !this.insertedIngredients.isEmpty();
+
+        // Form modifiers (placeholder catalysts, same as vanilla): gunpowder -> splash, dragon's breath -> lingering.
+        if (brewing && heldItem.is(Items.GUNPOWDER) && this.form == PotionForm.DRINK) {
+            if (!player.isCreative()) heldItem.shrink(1);
+            this.form = PotionForm.SPLASH;
+            level.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 1.4F);
+            setChanged();
+            return;
+        }
+        if (brewing && heldItem.is(Items.DRAGON_BREATH) && this.form != PotionForm.LINGERING) {
+            if (!player.isCreative()) {
+                heldItem.shrink(1);
+                ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
+            }
+            this.form = PotionForm.LINGERING;
+            level.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 0.8F);
+            setChanged();
+            return;
+        }
+
         // Right-clicking with a Glass Bottle to finish brewing
-        if (this.isFilled && this.isBoiling() && heldItem.is(Items.GLASS_BOTTLE) && !this.insertedIngredients.isEmpty()) {
+        if (brewing && heldItem.is(Items.GLASS_BOTTLE)) {
 
             long seed = (this.level instanceof ServerLevel serverLevel) ? serverLevel.getSeed() : 0L;
 
-            // Combine essences via EssenceDataLoader
             Map<EssenceType, Float> essencePool = EssenceDataLoader.combineIngredients(this.insertedIngredients);
-
-            // Pass pool + world seed to SynthesisEngine
             ProceduralPotionData potionData = SynthesisEngine.synthesize(essencePool, seed, PotionSize.MEDIUM);
 
-            ItemStack resultPotion = new ItemStack(WTItems.PROCEDURAL_POTION.get());
-            resultPotion.set(WTComponents.PROCEDURAL_POTION, potionData);
+            // Stack-size is handled by ProceduralPotion#getMaxStackSize, so no component patching needed.
+            ItemStack resultPotion = potionData.createStack(this.form);
 
             if (!player.isCreative()) {
                 heldItem.shrink(1);
@@ -192,6 +212,8 @@ public class DarkCauldronBlockEntity extends BlockEntity {
 
             // Reset cauldron state
             this.insertedIngredients.clear();
+            this.potionColor = 0;
+            this.form = PotionForm.DRINK;
             this.isFilled = false;
             this.heatTicks = 0;
 
@@ -203,19 +225,37 @@ public class DarkCauldronBlockEntity extends BlockEntity {
     }
 
     public boolean isValidIngredient(ItemStack stack) {
-        if (this.insertedIngredients.size() >= 5) return false;
+        if (this.insertedIngredients.size() >= MAX_INGREDIENTS) return false;
         if (stack.isEmpty()) return false;
 
-        // Direct check against EssenceDataLoader registry or fallback item map
         EssenceData data = EssenceDataLoader.getEssenceData(stack);
         return data != null && !data.values().isEmpty();
     }
 
+    // ------------------------------------------------------------------ colour
+
+    /** SERVER ONLY: recompute the blended colour from the current ingredients. */
+    private void recomputeColor() {
+        if (insertedIngredients.isEmpty()) {
+            potionColor = 0;
+            return;
+        }
+        Map<EssenceType, Float> pool = EssenceDataLoader.combineIngredients(insertedIngredients);
+        float total = 0f;
+        for (float w : pool.values()) total += w;
+        if (pool.isEmpty() || total <= 0f) {
+            potionColor = 0;
+            return;
+        }
+        int rgb = SynthesisEngine.blendEssenceColors(pool, total) & 0xFFFFFF;
+        potionColor = rgb == 0 ? 0x000001 : rgb; // 0 is reserved for "plain water"
+    }
+
+    /** CLIENT: ARGB colour for the liquid surface. */
     public int getFluidColor() {
         if (!this.isFilled) return 0xFFFFFFFF;
 
-        // Default water color if no ingredients inserted yet
-        if (this.insertedIngredients.isEmpty()) {
+        if (this.potionColor == 0) {
             if (this.level != null) {
                 IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Fluids.WATER);
                 int tint = ext.getTintColor(Fluids.WATER.defaultFluidState(), this.level, this.worldPosition);
@@ -223,32 +263,15 @@ public class DarkCauldronBlockEntity extends BlockEntity {
             }
             return 0xFF3F76E4;
         }
-
-        // Use your loader's combineIngredients helper!
-        Map<EssenceType, Float> essencePool = EssenceDataLoader.combineIngredients(this.insertedIngredients);
-        if (essencePool.isEmpty()) return 0xFF3F76E4;
-
-        float totalWeight = 0f;
-        float r = 0, g = 0, b = 0;
-
-        for (Map.Entry<EssenceType, Float> entry : essencePool.entrySet()) {
-            float weight = entry.getValue();
-            totalWeight += weight;
-            int color = entry.getKey().getDefaultColor(); // Ensure EssenceType returns ARGB integer
-
-            r += ((color >> 16) & 0xFF) * weight;
-            g += ((color >> 8) & 0xFF) * weight;
-            b += (color & 0xFF) * weight;
-        }
-
-        if (totalWeight <= 0f) return 0xFF3F76E4;
-
-        int finalR = Math.min(255, Math.round(r / totalWeight));
-        int finalG = Math.min(255, Math.round(g / totalWeight));
-        int finalB = Math.min(255, Math.round(b / totalWeight));
-
-        return (0xFF << 24) | (finalR << 16) | (finalG << 8) | finalB;
+        return 0xFF000000 | this.potionColor;
     }
+
+    /** Read-only view for the renderer (floating ingredient items). */
+    public List<ItemStack> getIngredients() {
+        return Collections.unmodifiableList(insertedIngredients);
+    }
+
+    // ------------------------------------------------------------------ client particles
 
     public static void clientTick(Level level, BlockPos pos, BlockState state, DarkCauldronBlockEntity entity) {
         if (!entity.isFilled || !entity.isBoiling()) return;
@@ -283,20 +306,24 @@ public class DarkCauldronBlockEntity extends BlockEntity {
         }
     }
 
+    // ------------------------------------------------------------------ sync / persistence
+
     private void syncToClient() {
-        if (!(level instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+        if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
         PacketDistributor.sendToPlayersTrackingChunk(
                 serverLevel,
                 new net.minecraft.world.level.ChunkPos(worldPosition),
-                new DarkCauldronFluidSyncPayload(this.worldPosition, this.isFilled, this.isBoiling(), new ArrayList<>(this.insertedIngredients)));
+                new DarkCauldronFluidSyncPayload(this.worldPosition, this.isFilled, this.isBoiling(),
+                        new ArrayList<>(this.insertedIngredients), this.potionColor));
     }
 
-    public void setClientData(boolean isFilled, boolean isBoiling, List<ItemStack> ingredients) {
+    public void setClientData(boolean isFilled, boolean isBoiling, List<ItemStack> ingredients, int color) {
         this.isFilled = isFilled;
         this.clientIsBoiling = isBoiling;
+        this.potionColor = color;
         this.insertedIngredients.clear();
         this.insertedIngredients.addAll(ingredients);
 
@@ -311,6 +338,14 @@ public class DarkCauldronBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.putBoolean("IsFilled", isFilled);
         tag.putInt("HeatTicks", heatTicks);
+        tag.putInt("PotionColor", potionColor);
+        tag.putString("Form", form.name());
+
+        ListTag list = new ListTag();
+        for (ItemStack stack : insertedIngredients) {
+            if (!stack.isEmpty()) list.add(stack.save(registries));
+        }
+        tag.put("Ingredients", list);
     }
 
     @Override
@@ -318,6 +353,19 @@ public class DarkCauldronBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         this.isFilled = tag.getBoolean("IsFilled");
         this.heatTicks = tag.getInt("HeatTicks");
+        this.potionColor = tag.getInt("PotionColor");
+
+        try {
+            this.form = PotionForm.valueOf(tag.getString("Form"));
+        } catch (IllegalArgumentException e) {
+            this.form = PotionForm.DRINK;
+        }
+
+        this.insertedIngredients.clear();
+        ListTag list = tag.getList("Ingredients", Tag.TAG_COMPOUND);
+        for (int i = 0; i < list.size(); i++) {
+            ItemStack.parse(registries, list.getCompound(i)).ifPresent(this.insertedIngredients::add);
+        }
     }
 
     @Override

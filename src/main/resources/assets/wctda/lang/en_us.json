@@ -11,5 +11,14 @@
   "item.wctda.soul_syringe": "Soul Syringe",
   "item.wctda.alter_analyzer": "Alter Analyzer",
 
-  "item.wctda.dark_crystal": "Dark Crystal"
+  "item.wctda.dark_crystal": "Dark Crystal",
+
+  "block.wctda.dark_cauldron": "Dark Cauldron",
+
+  "item.wctda.procedural_potion": "Alchemical Draught",
+  "item.wctda.procedural_splash_potion": "Splash Alchemical Draught",
+  "item.wctda.procedural_lingering_potion": "Lingering Alchemical Draught",
+  "item.wctda.potion_pouch": "Potion Pouch",
+
+  "entity.wctda.thrown_procedural_potion": "Thrown Alchemical Draught"
 }

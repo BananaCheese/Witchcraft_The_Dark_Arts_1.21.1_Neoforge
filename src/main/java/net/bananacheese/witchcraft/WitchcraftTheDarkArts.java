@@ -6,6 +6,7 @@ import net.bananacheese.witchcraft.component.WTComponents;
 import net.bananacheese.witchcraft.datagen.WTDataGenerators;
 import net.bananacheese.witchcraft.event.PlayerDeathHandler;
 import net.bananacheese.witchcraft.event.WTCloudEvents;
+import net.bananacheese.witchcraft.init.WTEntities;
 import net.bananacheese.witchcraft.init.WTMenuTypes;
 import net.bananacheese.witchcraft.item.WTItemGroup;
 import net.bananacheese.witchcraft.item.WTItems;
@@ -44,6 +45,7 @@ public class WitchcraftTheDarkArts {
         WTRecipes.RECIPE_TYPES.register(modEventBus);
         WTRecipes.RECIPE_SERIALIZERS.register(modEventBus);
         WTComponents.COMPONENTS.register(modEventBus);
+        WTEntities.ENTITY_TYPES.register(modEventBus);
 
         modEventBus.addListener(WTDataGenerators::gatherData);
 

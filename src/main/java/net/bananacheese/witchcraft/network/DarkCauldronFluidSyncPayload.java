@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public record DarkCauldronFluidSyncPayload(BlockPos pos, boolean isFilled, boolean isBoiling, List<ItemStack> ingredients) implements CustomPacketPayload {
+public record DarkCauldronFluidSyncPayload(BlockPos pos, boolean isFilled, boolean isBoiling, List<ItemStack> ingredients, int color) implements CustomPacketPayload {
 
     public static final Type<DarkCauldronFluidSyncPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID, "dark_cauldron_sync"));
@@ -26,6 +26,8 @@ public record DarkCauldronFluidSyncPayload(BlockPos pos, boolean isFilled, boole
                     DarkCauldronFluidSyncPayload::isBoiling,
                     ItemStack.OPTIONAL_LIST_STREAM_CODEC,
                     DarkCauldronFluidSyncPayload::ingredients,
+                    ByteBufCodecs.INT,
+                    DarkCauldronFluidSyncPayload::color,
                     DarkCauldronFluidSyncPayload::new
             );
 

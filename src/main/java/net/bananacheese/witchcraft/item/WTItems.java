@@ -1,10 +1,8 @@
 package net.bananacheese.witchcraft.item;
 
 import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
-import net.bananacheese.witchcraft.item.custom.AlterAnalyzer;
-import net.bananacheese.witchcraft.item.custom.PotionPouch;
-import net.bananacheese.witchcraft.item.custom.ProceduralPotion;
-import net.bananacheese.witchcraft.item.custom.SoulSyringe;
+import net.bananacheese.witchcraft.item.custom.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -23,6 +21,14 @@ public class WTItems {
 
     public static final DeferredItem<ProceduralPotion> PROCEDURAL_POTION =
             ITEMS.registerItem("procedural_potion", ProceduralPotion::new, new Item.Properties().stacksTo(1));
+
+    public static final DeferredItem<ThrowableProceduralPotion> PROCEDURAL_SPLASH_POTION =
+            ITEMS.registerItem("procedural_splash_potion",
+                    props -> new ThrowableProceduralPotion(props, false), new Item.Properties().stacksTo(1));
+
+    public static final DeferredItem<ThrowableProceduralPotion> PROCEDURAL_LINGERING_POTION =
+            ITEMS.registerItem("procedural_lingering_potion",
+                    props -> new ThrowableProceduralPotion(props, true), new Item.Properties().stacksTo(1));
 
     public static final DeferredItem<PotionPouch> POTION_POUCH =
             ITEMS.registerItem("potion_pouch", PotionPouch::new, new Item.Properties().stacksTo(1));

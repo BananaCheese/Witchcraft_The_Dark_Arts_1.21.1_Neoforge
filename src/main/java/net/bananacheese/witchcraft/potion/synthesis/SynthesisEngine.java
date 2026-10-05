@@ -9,18 +9,16 @@ import java.util.*;
 
 public class SynthesisEngine {
 
-    /**
-     * Synthesizes up to 5 ingredient essence profiles into a ProceduralPotionData instance.
-     *
-     * @param essenceInputs Map of essence types to total weight from up to 5 ingredients
-     * @param worldSeed     World seed used for deterministic variation
-     * @param targetSize    The output flask size (SMALL, MEDIUM, LARGE)
-     * @return Generated ProceduralPotionData container
-     */
-    public static ProceduralPotionData synthesize(Map<EssenceType, Float> essenceInputs, long worldSeed, PotionSize targetSize) {
-        if (essenceInputs == null || essenceInputs.isEmpty()) {
+    public static ProceduralPotionData synthesize(Map<EssenceType, Float> rawInputs, long worldSeed, PotionSize targetSize) {
+        if (rawInputs == null || rawInputs.isEmpty()) {
             return new ProceduralPotionData(List.of(), targetSize, 0x3F3F3F, "minecraft:bubble");
         }
+
+        // Normalise to an EnumMap so iteration order is always ordinal order. HashMap with enum keys
+        // iterates in identity-hash order, which changes between JVM runs and would make the
+        // "deterministic per seed" hash, dominant-essence tie-break and RNG draw order unstable.
+        Map<EssenceType, Float> essenceInputs = new EnumMap<>(EssenceType.class);
+        essenceInputs.putAll(rawInputs);
 
         // 1. Calculate Essence Statistics
         float totalWeight = 0f;
@@ -109,7 +107,9 @@ public class SynthesisEngine {
         return 0;                                                      // Level I
     }
 
-    private static int blendEssenceColors(Map<EssenceType, Float> inputs, float totalWeight) {
+    /** Weighted RGB average of the essence colours (no alpha). Public so the cauldron can preview it. */
+    public static int blendEssenceColors(Map<EssenceType, Float> inputs, float totalWeight) {
+        if (totalWeight <= 0f) return 0x3F76E4;
         float r = 0, g = 0, b = 0;
 
         for (Map.Entry<EssenceType, Float> entry : inputs.entrySet()) {
