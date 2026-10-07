@@ -2,7 +2,7 @@ package net.bananacheese.witchcraft.item;
 
 import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.item.custom.*;
-import net.minecraft.resources.ResourceLocation;
+import net.bananacheese.witchcraft.potion.PotionSize;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -18,6 +18,15 @@ public class WTItems {
 
     public static final DeferredItem<AlterAnalyzer> ALTER_ANALYZER =
             ITEMS.registerItem("alter_analyzer", AlterAnalyzer::new, new Item.Properties().stacksTo(1));
+
+    public static final DeferredItem<FlaskItem> SMALL_FLASK =
+            ITEMS.registerItem("small_flask", p -> new FlaskItem(p, PotionSize.SMALL), new Item.Properties().stacksTo(16));
+
+    public static final DeferredItem<FlaskItem> MEDIUM_FLASK =
+            ITEMS.registerItem("medium_flask", p -> new FlaskItem(p, PotionSize.MEDIUM), new Item.Properties().stacksTo(16));
+
+    public static final DeferredItem<FlaskItem> LARGE_FLASK =
+            ITEMS.registerItem("large_flask", p -> new FlaskItem(p, PotionSize.LARGE), new Item.Properties().stacksTo(16));
 
     public static final DeferredItem<ProceduralPotion> PROCEDURAL_POTION =
             ITEMS.registerItem("procedural_potion", ProceduralPotion::new, new Item.Properties().stacksTo(1));

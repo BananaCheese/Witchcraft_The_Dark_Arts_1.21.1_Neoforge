@@ -1,7 +1,6 @@
 package net.bananacheese.witchcraft.item.custom;
 
 import net.bananacheese.witchcraft.component.WTComponents;
-import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.potion.ProceduralEffect;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -15,8 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.List;
 
@@ -71,15 +68,17 @@ public class ProceduralPotion extends Item {
             player.awardStat(Stats.ITEM_USED.get(this));
         }
 
+        // Leave behind the empty flask of the same size (falls back to a glass bottle for data-less potions).
+        Item containerItem = data != null ? data.size().flask() : Items.GLASS_BOTTLE;
         boolean infinite = player != null && player.getAbilities().instabuild;
         if (!infinite) {
             stack.shrink(1);
             if (stack.isEmpty()) {
                 entity.gameEvent(GameEvent.DRINK);
-                return new ItemStack(Items.GLASS_BOTTLE);
+                return new ItemStack(containerItem);
             }
             if (player != null) {
-                player.getInventory().add(new ItemStack(Items.GLASS_BOTTLE));
+                player.getInventory().add(new ItemStack(containerItem));
             }
         }
 
@@ -112,3 +111,4 @@ public class ProceduralPotion extends Item {
         }
     }
 }
+

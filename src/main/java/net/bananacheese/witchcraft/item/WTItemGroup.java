@@ -27,6 +27,10 @@ public class WTItemGroup {
                 pOutput.accept(WTItems.SOUL_SYRINGE);
                 pOutput.accept(WTItems.ALTER_ANALYZER);
 
+                pOutput.accept(WTItems.SMALL_FLASK);
+                pOutput.accept(WTItems.MEDIUM_FLASK);
+                pOutput.accept(WTItems.LARGE_FLASK);
+
                 pOutput.accept(WTItems.POTION_POUCH);
 
                 // Dev sample potions (one per form) for testing without a cauldron.

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wctda:item/flask_medium_liquid",
+    "layer1": "wctda:item/flask_medium"
+  }
+}

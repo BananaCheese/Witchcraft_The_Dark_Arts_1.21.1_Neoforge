@@ -1,7 +1,21 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/potion_overlay",
-    "layer1": "minecraft:item/potion"
-  }
+    "layer0": "wctda:item/flask_small_liquid",
+    "layer1": "wctda:item/flask_small"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "wctda:potion_size": 1
+      },
+      "model": "wctda:item/procedural_potion_medium"
+    },
+    {
+      "predicate": {
+        "wctda:potion_size": 2
+      },
+      "model": "wctda:item/procedural_potion_large"
+    }
+  ]
 }

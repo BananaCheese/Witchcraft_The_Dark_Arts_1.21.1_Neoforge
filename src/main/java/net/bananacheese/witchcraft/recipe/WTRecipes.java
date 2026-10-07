@@ -4,6 +4,7 @@ import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -29,6 +30,10 @@ public final class WTRecipes {
 
     public static final DeferredHolder<RecipeSerializer<?>, RevivalRitualRecipeSerializer> REVIVAL_SERIALIZER =
             RECIPE_SERIALIZERS.register("revival_ritual", RevivalRitualRecipeSerializer::new);
+
+    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<PotionResizeRecipe>> POTION_RESIZE_SERIALIZER =
+            RECIPE_SERIALIZERS.register("potion_resize",
+                    () -> new SimpleCraftingRecipeSerializer<>(PotionResizeRecipe::new));
 
     private WTRecipes() {
     }

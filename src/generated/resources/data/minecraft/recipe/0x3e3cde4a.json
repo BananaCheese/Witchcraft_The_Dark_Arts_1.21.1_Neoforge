@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "wctda:medium_flask"
+    },
+    {
+      "item": "wctda:medium_flask"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "wctda:large_flask"
+  }
+}

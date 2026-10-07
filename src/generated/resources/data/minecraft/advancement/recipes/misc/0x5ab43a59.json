@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_dark_crystal": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wctda:dark_crystal"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "minecraft:0x5ab43a59"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_dark_crystal"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "minecraft:0x5ab43a59"
+    ]
+  }
+}

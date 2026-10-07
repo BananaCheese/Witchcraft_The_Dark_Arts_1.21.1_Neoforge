@@ -1,7 +1,6 @@
 package net.bananacheese.witchcraft;
 
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
-import net.bananacheese.witchcraft.block.entity.custom.DarkCauldronBlockEntity;
 import net.bananacheese.witchcraft.block.entity.renderer.AlterBlockEntityRenderer;
 import net.bananacheese.witchcraft.block.entity.renderer.DarkCauldronBlockEntityRenderer;
 import net.bananacheese.witchcraft.block.entity.renderer.PedestalBlockEntityRenderer;
@@ -16,6 +15,7 @@ import net.bananacheese.witchcraft.screen.PotionPouchScreen;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -45,6 +45,17 @@ public class WitchcraftTheDarkArtsClient {
                         WitchcraftTheDarkArts.MODID,
                         "syringe_fill_level"),
                 (stack, level, entity, seed) -> SoulSyringe.getFillLevel(stack)));
+
+        ResourceLocation sizeProperty = ResourceLocation.fromNamespaceAndPath(WitchcraftTheDarkArts.MODID, "potion_size");
+        for (Item potion : new Item[]{
+                WTItems.PROCEDURAL_POTION.get(),
+                WTItems.PROCEDURAL_SPLASH_POTION.get(),
+                WTItems.PROCEDURAL_LINGERING_POTION.get()}) {
+            ItemProperties.register(potion, sizeProperty, (stack, level, entity, seed) -> {
+                ProceduralPotionData data = stack.get(WTComponents.PROCEDURAL_POTION.get());
+                return data == null ? 0f : data.size().ordinal();
+            });
+        }
     }
 
     public WitchcraftTheDarkArtsClient(ModContainer container) {

@@ -20,5 +20,9 @@
   "item.wctda.procedural_lingering_potion": "Lingering Alchemical Draught",
   "item.wctda.potion_pouch": "Potion Pouch",
 
-  "entity.wctda.thrown_procedural_potion": "Thrown Alchemical Draught"
+  "entity.wctda.thrown_procedural_potion": "Thrown Alchemical Draught",
+
+  "item.wctda.small_flask": "Small Flask",
+  "item.wctda.medium_flask": "Medium Flask",
+  "item.wctda.large_flask": "Large Flask"
 }

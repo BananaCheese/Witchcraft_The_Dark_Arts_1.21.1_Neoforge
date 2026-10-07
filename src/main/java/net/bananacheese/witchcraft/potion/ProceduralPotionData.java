@@ -56,6 +56,18 @@ public record ProceduralPotionData(
     public static final float RAW_DAMAGE_SCALE = 1.0f;
     public static final float RAW_DAMAGE_CAP = 20.0f;
 
+    /** Same brew, different flask size. Effects keep their base values; the size multipliers apply at use time. */
+    public ProceduralPotionData withSize(PotionSize newSize) {
+        return new ProceduralPotionData(effects, newSize, color, particleTypeId);
+    }
+
+    /** True if both are the same brew, ignoring flask size. Used to decide whether potions may be merged. */
+    public boolean isSameBrew(ProceduralPotionData other) {
+        return color == other.color
+                && particleTypeId.equals(other.particleTypeId)
+                && effects.equals(other.effects);
+    }
+
     /** Builds a ready-to-use stack of the given form carrying this data. */
     public ItemStack createStack(PotionForm form) {
         ItemStack stack = new ItemStack(form.item());

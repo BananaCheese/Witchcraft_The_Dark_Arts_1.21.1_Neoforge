@@ -2,9 +2,9 @@ package net.bananacheese.witchcraft.block.entity.custom;
 
 import net.bananacheese.witchcraft.block.custom.DarkCauldron;
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
+import net.bananacheese.witchcraft.item.custom.FlaskItem;
 import net.bananacheese.witchcraft.network.DarkCauldronFluidSyncPayload;
 import net.bananacheese.witchcraft.potion.PotionForm;
-import net.bananacheese.witchcraft.potion.PotionSize;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
 import net.bananacheese.witchcraft.potion.synthesis.EssenceData;
 import net.bananacheese.witchcraft.potion.synthesis.EssenceDataLoader;
@@ -193,13 +193,13 @@ public class DarkCauldronBlockEntity extends BlockEntity {
             return;
         }
 
-        // Right-clicking with a Glass Bottle to finish brewing
-        if (brewing && heldItem.is(Items.GLASS_BOTTLE)) {
+        // Right-clicking with an empty flask finishes the brew; the flask's size decides the potion's size.
+        if (brewing && heldItem.getItem() instanceof FlaskItem flask) {
 
             long seed = (this.level instanceof ServerLevel serverLevel) ? serverLevel.getSeed() : 0L;
 
             Map<EssenceType, Float> essencePool = EssenceDataLoader.combineIngredients(this.insertedIngredients);
-            ProceduralPotionData potionData = SynthesisEngine.synthesize(essencePool, seed, PotionSize.MEDIUM);
+            ProceduralPotionData potionData = SynthesisEngine.synthesize(essencePool, seed, flask.getSize());
 
             // Stack-size is handled by ProceduralPotion#getMaxStackSize, so no component patching needed.
             ItemStack resultPotion = potionData.createStack(this.form);
