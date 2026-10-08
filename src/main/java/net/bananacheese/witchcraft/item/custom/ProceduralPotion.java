@@ -52,21 +52,33 @@ public class ProceduralPotion extends Item {
         return ItemUtils.startUsingInstantly(level, player, hand);
     }
 
-    @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+    /**
+     * The "drink" half: advancement trigger, effects, stat and game event. Does NOT consume the stack or
+     * return a flask, so both the potion item itself and the Potion Pouch can share it.
+     */
+    public void applyDrink(ItemStack stack, LivingEntity entity) {
         Player player = entity instanceof Player p ? p : null;
         if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
         }
 
         ProceduralPotionData data = stack.get(WTComponents.PROCEDURAL_POTION.get());
-        if (!level.isClientSide && data != null) {
+        if (!entity.level().isClientSide && data != null) {
             data.applyTo(entity, player, player, 1.0);
         }
 
         if (player != null) {
             player.awardStat(Stats.ITEM_USED.get(this));
         }
+        entity.gameEvent(GameEvent.DRINK);
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+        Player player = entity instanceof Player p ? p : null;
+        ProceduralPotionData data = stack.get(WTComponents.PROCEDURAL_POTION.get());
+
+        applyDrink(stack, entity);
 
         // Leave behind the empty flask of the same size (falls back to a glass bottle for data-less potions).
         Item containerItem = data != null ? data.size().flask() : Items.GLASS_BOTTLE;
@@ -74,7 +86,6 @@ public class ProceduralPotion extends Item {
         if (!infinite) {
             stack.shrink(1);
             if (stack.isEmpty()) {
-                entity.gameEvent(GameEvent.DRINK);
                 return new ItemStack(containerItem);
             }
             if (player != null) {
@@ -82,7 +93,6 @@ public class ProceduralPotion extends Item {
             }
         }
 
-        entity.gameEvent(GameEvent.DRINK);
         return stack;
     }
 
@@ -111,4 +121,3 @@ public class ProceduralPotion extends Item {
         }
     }
 }
-

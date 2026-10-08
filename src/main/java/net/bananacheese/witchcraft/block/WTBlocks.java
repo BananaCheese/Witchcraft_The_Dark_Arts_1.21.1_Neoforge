@@ -6,6 +6,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -26,7 +27,7 @@ public final class WTBlocks {
 
     public static final DeferredBlock<DarkCauldron> DARK_CAULDRON = BLOCKS.registerBlock(
             "dark_cauldron", DarkCauldron::new,
-            BlockBehaviour.Properties.of().noOcclusion().strength(2, 6));
+            BlockBehaviour.Properties.of().noOcclusion().strength(2, 6).pushReaction(PushReaction.BLOCK));
 
     public static final DeferredBlock<DarkBarrierBlock> DARK_BARRIER = BLOCKS.registerBlock(
             "dark_barrier", DarkBarrierBlock::new,

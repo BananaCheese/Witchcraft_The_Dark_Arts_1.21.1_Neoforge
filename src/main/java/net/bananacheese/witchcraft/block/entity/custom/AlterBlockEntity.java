@@ -1,7 +1,7 @@
 package net.bananacheese.witchcraft.block.entity.custom;
 
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
-import net.bananacheese.witchcraft.network.AlterFluidSyncPayload;
+import net.bananacheese.witchcraft.network.AlterSyncPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -179,11 +179,17 @@ public class AlterBlockEntity extends BlockEntity {
         PacketDistributor.sendToPlayersTrackingChunk(
                 serverLevel,
                 new net.minecraft.world.level.ChunkPos(worldPosition),
-                new AlterFluidSyncPayload(worldPosition, fluid.copy()));
+                new AlterSyncPayload(worldPosition, heldItem.copy(), fluid.copy()));
     }
 
     public void setFluidClient(FluidStack stack) {
         fluid = stack.copy();
+    }
+
+    /** CLIENT: applies a full sync from the server (held item + fluid). */
+    public void setClientData(ItemStack heldItem, FluidStack fluid) {
+        this.heldItem = heldItem.copy();
+        this.fluid = fluid.copy();
     }
 
     @Override

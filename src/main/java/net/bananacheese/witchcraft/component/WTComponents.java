@@ -37,6 +37,11 @@ public final class WTComponents {
                     .networkSynchronized(ProceduralPotionData.STREAM_CODEC)
                     .build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> POUCH_ACTIVE_SLOT =
+            COMPONENTS.registerComponentType("pouch_active_slot", builder -> builder
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.VAR_INT));
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> ANALYZED =
             COMPONENTS.register("analyzed",
                     () -> DataComponentType.<Boolean>builder()

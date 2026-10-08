@@ -89,9 +89,10 @@ public class DarkCauldronBlockEntity extends BlockEntity {
 
         // 2. Ingest ItemEntities floating inside or near the cauldron basin
         if (currentlyBoiling && cauldron.insertedIngredients.size() < MAX_INGREDIENTS) {
+            // The controller sits at the north-west corner; the basin spans the full 2x2 footprint.
             AABB basinBox = new AABB(
-                    pos.getX() + 0.0625D, pos.getY() + 0.125D, pos.getZ() + 0.0625D,
-                    pos.getX() + 0.9375D, pos.getY() + 1.25D, pos.getZ() + 0.9375D
+                    pos.getX() + 0.125D, pos.getY() + 0.125D, pos.getZ() + 0.125D,
+                    pos.getX() + 1.875D, pos.getY() + 1.25D, pos.getZ() + 1.875D
             );
 
             List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, basinBox);
@@ -266,6 +267,16 @@ public class DarkCauldronBlockEntity extends BlockEntity {
         return 0xFF000000 | this.potionColor;
     }
 
+    /** SERVER: spill the floating ingredients (called when the cauldron is broken). */
+    public void dropIngredients() {
+        if (level == null || level.isClientSide()) return;
+        for (ItemStack stack : insertedIngredients) {
+            net.minecraft.world.level.block.Block.popResource(level, worldPosition.above(), stack.copy());
+        }
+        insertedIngredients.clear();
+        potionColor = 0;
+    }
+
     /** Read-only view for the renderer (floating ingredient items). */
     public List<ItemStack> getIngredients() {
         return Collections.unmodifiableList(insertedIngredients);
@@ -279,9 +290,9 @@ public class DarkCauldronBlockEntity extends BlockEntity {
         RandomSource rand = level.getRandom();
 
         if (rand.nextFloat() < 0.35f) {
-            double px = pos.getX() + 0.2D + (rand.nextDouble() * 0.6D);
+            double px = pos.getX() + 0.4D + (rand.nextDouble() * 1.2D);
             double py = pos.getY() + 0.82D; // Slightly above fluid line
-            double pz = pos.getZ() + 0.2D + (rand.nextDouble() * 0.6D);
+            double pz = pos.getZ() + 0.4D + (rand.nextDouble() * 1.2D);
 
             level.addParticle(
                     net.minecraft.core.particles.ParticleTypes.BUBBLE_POP,
@@ -298,7 +309,7 @@ public class DarkCauldronBlockEntity extends BlockEntity {
 
         if (rand.nextFloat() < 0.05f) {
             level.playLocalSound(
-                    pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D,
+                    pos.getX() + 1.0D, pos.getY() + 0.5D, pos.getZ() + 1.0D,
                     net.minecraft.sounds.SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
                     net.minecraft.sounds.SoundSource.BLOCKS,
                     0.25F, 1.0F, false

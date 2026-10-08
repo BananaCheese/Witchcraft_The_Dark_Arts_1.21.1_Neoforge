@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
-      "model": "wctda:block/dark_cauldron"
+    "part=north_west": {
+      "model": "wctda:block/dark_cauldron_2x2"
+    },
+    "part=north_east": {
+      "model": "wctda:block/dark_cauldron_part"
+    },
+    "part=south_west": {
+      "model": "wctda:block/dark_cauldron_part"
+    },
+    "part=south_east": {
+      "model": "wctda:block/dark_cauldron_part"
     }
   }
 }

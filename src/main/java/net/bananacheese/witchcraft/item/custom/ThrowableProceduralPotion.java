@@ -36,19 +36,27 @@ public class ThrowableProceduralPotion extends ProceduralPotion {
             return InteractionResultHolder.pass(stack);
         }
 
+        throwFrom(level, player, stack);
+        stack.consume(1, player);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    /**
+     * Throws one of {@code potion} from the player (sound, projectile, stat). Does NOT consume anything,
+     * so the Potion Pouch can throw a potion out of one of its own slots.
+     */
+    public void throwFrom(Level level, Player player, ItemStack potion) {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 lingering ? SoundEvents.LINGERING_POTION_THROW : SoundEvents.SPLASH_POTION_THROW,
                 SoundSource.PLAYERS, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!level.isClientSide) {
             ThrownProceduralPotion thrown = new ThrownProceduralPotion(level, player);
-            thrown.setItem(stack.copyWithCount(1));
+            thrown.setItem(potion.copyWithCount(1));
             thrown.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
             level.addFreshEntity(thrown);
         }
 
         player.awardStat(Stats.ITEM_USED.get(this));
-        stack.consume(1, player);
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
 }

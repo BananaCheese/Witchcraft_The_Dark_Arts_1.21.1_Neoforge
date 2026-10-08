@@ -43,7 +43,14 @@ public class PotionPouchMenu extends AbstractContainerMenu {
         // 2. Add Main Player Inventory Slots (3x9)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                int inventoryIndex = col + row * 9 + 9;
+                this.addSlot(new Slot(playerInventory, inventoryIndex, 8 + col * 18, 84 + row * 18) {
+                    @Override
+                    public boolean mayPickup(Player player) {
+                        // The pouch may now be opened from anywhere in the inventory (keybind), not only the hotbar.
+                        return inventoryIndex != pouchSlotIndex;
+                    }
+                });
             }
         }
 
