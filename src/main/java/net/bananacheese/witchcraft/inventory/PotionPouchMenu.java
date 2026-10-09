@@ -81,6 +81,26 @@ public class PotionPouchMenu extends AbstractContainerMenu {
         super.clicked(slotId, button, clickType, player);
     }
 
+    private void mergeIntoPouch(ItemStack source) {
+        for (int i = 0; i < 5 && !source.isEmpty(); i++) {
+            Slot pouchSlot = this.slots.get(i);
+            ItemStack existing = pouchSlot.getItem();
+            if (existing.isEmpty() || !ItemStack.isSameItemSameComponents(existing, source)) {
+                continue;
+            }
+
+            int space = pouchSlot.getMaxStackSize(existing) - existing.getCount();
+            if (space <= 0) {
+                continue;
+            }
+
+            int moved = Math.min(space, source.getCount());
+            existing.grow(moved);
+            source.shrink(moved);
+            pouchSlot.setChanged();
+        }
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
@@ -98,8 +118,20 @@ public class PotionPouchMenu extends AbstractContainerMenu {
             } else {
                 // Move from Player Inventory -> Pouch
                 if (itemstack1.has(WTComponents.PROCEDURAL_POTION.get())) {
-                    if (!this.moveItemStackTo(itemstack1, 0, 5, false)) {
-                        return ItemStack.EMPTY;
+                    int before = itemstack1.getCount();
+
+                    // 1) Top up matching stacks using the POUCH's limits. Vanilla's moveItemStackTo only merges
+                    //    "stackable" items (max stack size > 1), and large potions have a max of 1, so without this
+                    //    pass they could never join an existing stack in the pouch.
+                    mergeIntoPouch(itemstack1);
+
+                    // 2) Whatever is left goes into empty pouch slots.
+                    if (!itemstack1.isEmpty()) {
+                        this.moveItemStackTo(itemstack1, 0, 5, false);
+                    }
+
+                    if (itemstack1.getCount() == before) {
+                        return ItemStack.EMPTY; // nothing moved
                     }
                 } else {
                     return ItemStack.EMPTY;
