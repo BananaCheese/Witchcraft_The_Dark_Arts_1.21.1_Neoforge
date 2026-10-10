@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_small_flask": {
+    "has_medium_flask": {
       "conditions": {
         "items": [
           {
-            "items": "wctda:small_flask"
+            "items": "wctda:medium_flask"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:0x45a14255"
+        "recipe": "minecraft:0x0426ac92"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_small_flask"
+      "has_medium_flask"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:0x45a14255"
+      "minecraft:0x0426ac92"
     ]
   }
 }

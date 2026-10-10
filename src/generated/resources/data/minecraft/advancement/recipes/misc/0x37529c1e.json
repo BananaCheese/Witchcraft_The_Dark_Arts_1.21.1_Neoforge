@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:0x5ab43a59"
+        "recipe": "minecraft:0x37529c1e"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:0x5ab43a59"
+      "minecraft:0x37529c1e"
     ]
   }
 }

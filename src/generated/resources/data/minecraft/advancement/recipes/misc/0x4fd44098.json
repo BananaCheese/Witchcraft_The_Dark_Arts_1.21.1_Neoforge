@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:0x0903c506"
+        "recipe": "minecraft:0x4fd44098"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:0x0903c506"
+      "minecraft:0x4fd44098"
     ]
   }
 }
