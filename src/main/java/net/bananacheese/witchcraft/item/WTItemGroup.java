@@ -6,6 +6,8 @@ import net.bananacheese.witchcraft.potion.PotionForm;
 import net.bananacheese.witchcraft.potion.PotionSize;
 import net.bananacheese.witchcraft.potion.ProceduralEffect;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
+import net.bananacheese.witchcraft.potion.synthesis.EssenceType;
+import net.bananacheese.witchcraft.potion.synthesis.SynthesisEngine;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -33,18 +35,14 @@ public class WTItemGroup {
 
                 pOutput.accept(WTItems.POTION_POUCH);
 
-                // Dev sample potions (one per form) for testing without a cauldron.
-                ProceduralPotionData boon = new ProceduralPotionData(
-                        List.of(new ProceduralEffect("minecraft:strength", 1200, 1, 0f),
-                                new ProceduralEffect("minecraft:regeneration", 600, 0, 0f)),
-                        PotionSize.MEDIUM, 0xFF3300, "minecraft:flame");
-                ProceduralPotionData bane = new ProceduralPotionData(
-                        List.of(new ProceduralEffect("minecraft:poison", 600, 1, 4f),
-                                new ProceduralEffect("minecraft:slowness", 400, 0, 0f)),
-                        PotionSize.MEDIUM, 0x00CC33, "minecraft:spore_blossom_dust");
-                pOutput.accept(boon.createStack(PotionForm.DRINK));
-                pOutput.accept(bane.createStack(PotionForm.SPLASH));
-                pOutput.accept(bane.createStack(PotionForm.LINGERING));
+                // Dev sample potions for testing without a cauldron: per element, a bane (splash) and a boon (drink).
+                for (EssenceType element : EssenceType.values()) {
+                    pOutput.accept(SynthesisEngine.sample(element, true, PotionSize.MEDIUM).createStack(PotionForm.SPLASH));
+                    pOutput.accept(SynthesisEngine.sample(element, false, PotionSize.MEDIUM).createStack(PotionForm.DRINK));
+                }
+                // A lingering bane and a large boon, for testing clouds and the size recipes.
+                pOutput.accept(SynthesisEngine.sample(EssenceType.FIRE, true, PotionSize.MEDIUM).createStack(PotionForm.LINGERING));
+                pOutput.accept(SynthesisEngine.sample(EssenceType.FIRE, false, PotionSize.LARGE).createStack(PotionForm.DRINK));
 
                 pOutput.accept(WTBlocks.ALTER);
                 pOutput.accept(WTBlocks.PEDESTAL);

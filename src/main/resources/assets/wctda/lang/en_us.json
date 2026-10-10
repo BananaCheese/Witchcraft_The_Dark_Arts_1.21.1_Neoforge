@@ -28,5 +28,28 @@
 
   "key.categories.wctda": "Witchcraft: The Dark Arts",
   "key.wctda.pouch_select": "Potion Pouch: Select Slot",
-  "key.wctda.pouch_open": "Potion Pouch: Open"
+  "key.wctda.pouch_open": "Potion Pouch: Open",
+
+  "effect.wctda.fire_ward": "Fire Ward",
+  "effect.wctda.ice_ward": "Frost Ward",
+  "effect.wctda.lightning_ward": "Storm Ward",
+  "effect.wctda.poison_ward": "Venom Ward",
+  "effect.wctda.vitality_ward": "Thorn Ward",
+  "effect.wctda.order_ward": "Arcane Ward",
+  "effect.wctda.chaos_giant": "Giant",
+  "effect.wctda.chaos_tiny": "Tiny",
+  "death.attack.wctda_potion_fire": "%1$s was incinerated by a potion",
+  "death.attack.wctda_potion_fire.player": "%1$s was incinerated by %2$s's potion",
+  "death.attack.wctda_potion_ice": "%1$s was frozen solid by a potion",
+  "death.attack.wctda_potion_ice.player": "%1$s was frozen solid by %2$s's potion",
+  "death.attack.wctda_potion_lightning": "%1$s was shocked by a potion",
+  "death.attack.wctda_potion_lightning.player": "%1$s was shocked by %2$s's potion",
+  "death.attack.wctda_potion_poison": "%1$s was poisoned by a potion",
+  "death.attack.wctda_potion_poison.player": "%1$s was poisoned by %2$s's potion",
+  "death.attack.wctda_potion_physical": "%1$s was impaled by potion spikes",
+  "death.attack.wctda_potion_physical.player": "%1$s was impaled by %2$s's potion spikes",
+  "death.attack.wctda_potion_arcane": "%1$s was unravelled by a potion",
+  "death.attack.wctda_potion_arcane.player": "%1$s was unravelled by %2$s's potion",
+  "death.attack.wctda_potion_chaos": "%1$s was a victim of chaos",
+  "death.attack.wctda_potion_chaos.player": "%1$s was a victim of %2$s's chaos"
 }

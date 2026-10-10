@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bananacheese.witchcraft.WitchcraftTheDarkArts;
 import net.bananacheese.witchcraft.component.WTComponents;
+import net.bananacheese.witchcraft.potion.element.ElementalEffects;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,7 +14,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -30,14 +30,22 @@ public record ProceduralPotionData(
         List<ProceduralEffect> effects,
         PotionSize size,
         int color,
-        String particleTypeId
+        String particleTypeId,
+        ElementalProfile profile
 ) {
+    /** Convenience for potions with no elemental behaviour (legacy data, tests). */
+    public ProceduralPotionData(List<ProceduralEffect> effects, PotionSize size, int color, String particleTypeId) {
+        this(effects, size, color, particleTypeId, ElementalProfile.NONE);
+    }
+
     public static final Codec<ProceduralPotionData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     ProceduralEffect.CODEC.listOf().fieldOf("effects").forGetter(ProceduralPotionData::effects),
                     Codec.STRING.xmap(PotionSize::valueOf, PotionSize::name).fieldOf("size").forGetter(ProceduralPotionData::size),
                     Codec.INT.fieldOf("color").forGetter(ProceduralPotionData::color),
-                    Codec.STRING.fieldOf("particle_type").forGetter(ProceduralPotionData::particleTypeId)
+                    Codec.STRING.fieldOf("particle_type").forGetter(ProceduralPotionData::particleTypeId),
+                    // optional so potions saved before the element system still load
+                    ElementalProfile.CODEC.optionalFieldOf("element_profile", ElementalProfile.NONE).forGetter(ProceduralPotionData::profile)
             ).apply(instance, ProceduralPotionData::new)
     );
 
@@ -46,26 +54,24 @@ public record ProceduralPotionData(
             ByteBufCodecs.STRING_UTF8.map(PotionSize::valueOf, PotionSize::name), ProceduralPotionData::size,
             ByteBufCodecs.VAR_INT, ProceduralPotionData::color,
             ByteBufCodecs.STRING_UTF8, ProceduralPotionData::particleTypeId,
+            ElementalProfile.STREAM_CODEC, ProceduralPotionData::profile,
             ProceduralPotionData::new
     );
 
-    // ------------------------------------------------------------------------------------
-    // Balance knobs for ProceduralEffect.rawElementalDamage (previously unused).
-    // Set RAW_DAMAGE_SCALE to 0 to disable the direct-damage component entirely.
-    // ------------------------------------------------------------------------------------
-    public static final float RAW_DAMAGE_SCALE = 1.0f;
-    public static final float RAW_DAMAGE_CAP = 20.0f;
+    /** Hard ceiling on the direct damage of a single hit, after size scaling. */
+    public static final float DAMAGE_CAP = 20.0f;
 
     /** Same brew, different flask size. Effects keep their base values; the size multipliers apply at use time. */
     public ProceduralPotionData withSize(PotionSize newSize) {
-        return new ProceduralPotionData(effects, newSize, color, particleTypeId);
+        return new ProceduralPotionData(effects, newSize, color, particleTypeId, profile);
     }
 
     /** True if both are the same brew, ignoring flask size. Used to decide whether potions may be merged. */
     public boolean isSameBrew(ProceduralPotionData other) {
         return color == other.color
                 && particleTypeId.equals(other.particleTypeId)
-                && effects.equals(other.effects);
+                && effects.equals(other.effects)
+                && profile.equals(other.profile);
     }
 
     /** Builds a ready-to-use stack of the given form carrying this data. */
@@ -96,12 +102,29 @@ public record ProceduralPotionData(
         return out;
     }
 
-    /** Total direct (non-effect) damage this potion deals at full intensity. */
-    public float totalRawDamage() {
-        float sum = 0f;
-        for (ProceduralEffect e : effects) sum += e.rawElementalDamage();
-        sum *= size.getPotencyMultiplier() * RAW_DAMAGE_SCALE;
-        return Math.min(sum, RAW_DAMAGE_CAP);
+    /** Direct elemental damage of one full-strength hit, after size scaling and the cap. Boons return 0. */
+    public float scaledDamage() {
+        if (!profile.harmful()) return 0f;
+        return Math.min(profile.damage() * size.getPotencyMultiplier(), DAMAGE_CAP);
+    }
+
+    /** Player-facing one-liner about the potion's element and damage, or "" for legacy potions. */
+    public String elementSummary() {
+        if (profile.isNone()) return "";
+        var element = profile.element();
+        if (!profile.harmful()) return element.getLabel() + " boon";
+        if (element == net.bananacheese.witchcraft.potion.synthesis.EssenceType.CHAOS) return "Chaos (unpredictable)";
+        return String.format("%.1f %s damage", scaledDamage(), element.getDamageLabel());
+    }
+
+    /** Display name of a (possibly modded) effect id, falling back to the raw id. */
+    public static String effectDisplayName(String effectId) {
+        ResourceLocation id = ResourceLocation.tryParse(effectId);
+        if (id != null) {
+            var effect = BuiltInRegistries.MOB_EFFECT.getOptional(id);
+            if (effect.isPresent()) return effect.get().getDisplayName().getString();
+        }
+        return effectId;
     }
 
     /**
@@ -124,12 +147,18 @@ public record ProceduralPotionData(
             }
         }
 
-        float damage = (float) (totalRawDamage() * intensity);
-        if (damage > 0f) {
-            DamageSource damageSource = source != null
-                    ? target.damageSources().indirectMagic(source, owner)
-                    : target.damageSources().magic();
-            target.hurt(damageSource, damage);
+        applyElemental(target, source, owner, intensity);
+    }
+
+    /**
+     * Only the elemental half (typed damage, interactions, chaos outcomes). Lingering zones use this on every
+     * pulse, because the vanilla cloud already re-applies the effect list by itself.
+     */
+    public void applyElemental(LivingEntity target, @Nullable Entity source, @Nullable Entity owner, double intensity) {
+        if (profile.harmful()) {
+            ElementalEffects.applyHarm(this, target, source, owner, intensity);
+        } else {
+            ElementalEffects.applyBoon(this, target, owner, intensity);
         }
     }
 

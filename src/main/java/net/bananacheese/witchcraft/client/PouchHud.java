@@ -152,19 +152,23 @@ public final class PouchHud {
         lines.add(stack.getHoverName().copy().withStyle(style -> style.withColor(TextColor.fromRgb(lighten(data.color())))));
 
         StringBuilder effects = new StringBuilder();
+        if (data.profile().harmful()) {
+            effects.append(data.elementSummary());
+        }
         for (MobEffectInstance effect : data.toEffectInstances()) {
             if (!effects.isEmpty()) effects.append(", ");
             effects.append(Component.translatable(effect.getDescriptionId()).getString());
             if (effect.getAmplifier() > 0) effects.append(' ').append(effect.getAmplifier() + 1);
         }
-        if (effects.isEmpty()) effects.append("No effects");
+        if (effects.isEmpty()) effects.append(data.profile().isNone() ? "No effects" : data.elementSummary());
         lines.add(Component.literal(Minecraft.getInstance().font.plainSubstrByWidth(effects.toString(), 150))
                 .withStyle(net.minecraft.ChatFormatting.GRAY));
 
         String form = stack.getItem() instanceof ThrowableProceduralPotion t
                 ? (t.isLingering() ? "Lingering" : "Splash") : "Drink";
         String size = data.size().name().charAt(0) + data.size().name().substring(1).toLowerCase();
-        lines.add(Component.literal(size + " \u2022 " + form).withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        String element = data.profile().isNone() ? "" : " \u2022 " + data.profile().element().getLabel();
+        lines.add(Component.literal(size + " \u2022 " + form + element).withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
         return lines;
     }
 

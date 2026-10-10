@@ -107,6 +107,20 @@ public class ProceduralPotion extends Item {
         }
 
         tooltipComponents.add(Component.literal("§7Size: §f" + data.size().name()));
+
+        if (!data.profile().isNone()) {
+            var element = data.profile().element();
+            String alignment = data.profile().harmful() ? "§cBane" : "§aBoon";
+            tooltipComponents.add(Component.literal("§7Element: §f" + element.getLabel() + " §8(" + alignment + "§8)"));
+            if (data.profile().harmful()) {
+                tooltipComponents.add(Component.literal("§7Deals: §c" + data.elementSummary()));
+                tooltipComponents.add(Component.literal("§8" + element.getHint()));
+            }
+        }
+
+        if (data.effects().isEmpty()) {
+            return;
+        }
         tooltipComponents.add(Component.literal("§7Effects:"));
 
         for (ProceduralEffect effect : data.effects()) {
@@ -114,7 +128,7 @@ public class ProceduralPotion extends Item {
             int scaledAmp = Math.round(effect.baseAmplifier() * data.size().getPotencyMultiplier());
 
             tooltipComponents.add(Component.literal(
-                    " §8• §f" + effect.effectTypeId() +
+                    " §8• §f" + ProceduralPotionData.effectDisplayName(effect.effectTypeId()) +
                             " §7(Lvl " + (scaledAmp + 1) + ") " +
                             "§8[" + (scaledDuration / 20) + "s]"
             ));

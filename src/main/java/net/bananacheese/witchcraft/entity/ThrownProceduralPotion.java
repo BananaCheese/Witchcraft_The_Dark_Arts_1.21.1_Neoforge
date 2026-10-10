@@ -5,6 +5,8 @@ import net.bananacheese.witchcraft.init.WTEntities;
 import net.bananacheese.witchcraft.item.WTItems;
 import net.bananacheese.witchcraft.item.custom.ThrowableProceduralPotion;
 import net.bananacheese.witchcraft.potion.ProceduralPotionData;
+import net.bananacheese.witchcraft.potion.element.ElementalEffects;
+import net.bananacheese.witchcraft.potion.element.ElementalZones;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
@@ -62,6 +64,13 @@ public class ThrownProceduralPotion extends ThrowableItemProjectile {
                 // Custom particle burst on top of vanilla's tinted splash (levelEvent below).
                 serverLevel.sendParticles(data.particleOrDefault(),
                         getX(), getY() + 0.1D, getZ(), 24, 0.5D, 0.3D, 0.5D, 0.02D);
+
+                // Element extras: fire blasts, vitality spikes, ...
+                ElementalEffects.onImpact(data, serverLevel, position(), getOwner());
+                // The vanilla cloud only re-applies effects; this zone adds the typed elemental damage.
+                if (lingering) {
+                    ElementalZones.add(serverLevel, position(), data, getOwner());
+                }
             }
         }
 
@@ -93,7 +102,7 @@ public class ThrownProceduralPotion extends ThrowableItemProjectile {
         cloud.setRadiusOnUse(-0.5F);
         cloud.setWaitTime(10);
         // Size scales cloud lifetime the same way it scales effect duration.
-        cloud.setDuration(Math.round(600 * data.size().getDurationMultiplier()));
+        cloud.setDuration(ElementalZones.cloudDuration(data));
         cloud.setRadiusPerTick(-cloud.getRadius() / (float) cloud.getDuration());
         cloud.setPotionContents(data.toPotionContents());
         data.particle().ifPresent(cloud::setParticle);

@@ -4,12 +4,15 @@ import net.bananacheese.witchcraft.block.WTBlocks;
 import net.bananacheese.witchcraft.block.entity.WTBlockEntities;
 import net.bananacheese.witchcraft.component.WTComponents;
 import net.bananacheese.witchcraft.datagen.WTDataGenerators;
+import net.bananacheese.witchcraft.event.ElementalDamageHandler;
 import net.bananacheese.witchcraft.event.PlayerDeathHandler;
 import net.bananacheese.witchcraft.event.WTCloudEvents;
+import net.bananacheese.witchcraft.init.WTEffects;
 import net.bananacheese.witchcraft.init.WTEntities;
 import net.bananacheese.witchcraft.init.WTMenuTypes;
 import net.bananacheese.witchcraft.item.WTItemGroup;
 import net.bananacheese.witchcraft.item.WTItems;
+import net.bananacheese.witchcraft.potion.element.ElementalZones;
 import net.bananacheese.witchcraft.potion.synthesis.EssenceDataLoader;
 import net.bananacheese.witchcraft.recipe.WTRecipes;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -46,11 +49,15 @@ public class WitchcraftTheDarkArts {
         WTRecipes.RECIPE_SERIALIZERS.register(modEventBus);
         WTComponents.COMPONENTS.register(modEventBus);
         WTEntities.ENTITY_TYPES.register(modEventBus);
+        WTEffects.MOB_EFFECTS.register(modEventBus);
 
         modEventBus.addListener(WTDataGenerators::gatherData);
 
         NeoForge.EVENT_BUS.addListener(WTCloudEvents::onLivingJump);
         NeoForge.EVENT_BUS.addListener(PlayerDeathHandler::onPlayerDeath);
+        NeoForge.EVENT_BUS.addListener(ElementalDamageHandler::onIncomingDamage);
+        NeoForge.EVENT_BUS.addListener(ElementalZones::onServerTick);
+        NeoForge.EVENT_BUS.addListener(ElementalZones::onServerStopping);
         NeoForge.EVENT_BUS.addListener(WitchcraftTheDarkArts::onAddReloadListeners);
 
         WTMenuTypes.MENU_TYPES.register(modEventBus);
